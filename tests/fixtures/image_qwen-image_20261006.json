@@ -1,0 +1,26 @@
+{
+ "method": "POST",
+ "path": "/v2/image/qwen/generate",
+ "request_body": {
+  "prompt": "A small red apple on a white table",
+  "model": "Qwen/qwen-image",
+  "size": "512x512"
+ },
+ "request_headers": [],
+ "status": 200,
+ "headers": {
+  "x-request-id": "9da98813-23e6-43e3-9edb-23cf79b8620c",
+  "content-type": "application/json"
+ },
+ "ms": 5151,
+ "body": {
+  "urls": [
+   "https://cdn.relaygpu.com/content/3Qo-YCTEnVPtFyJnfGXDXw"
+  ],
+  "model": "Qwen/qwen-image",
+  "size": "512x512",
+  "task_id": "direct:8edfe6a0-752d-46fc-b89f-9ff69d1a5fd2",
+  "task_address": null,
+  "mode": "direct"
+ }
+}

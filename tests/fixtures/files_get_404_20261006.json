@@ -1,0 +1,26 @@
+{
+  "captured": "2026-10-06",
+  "env": "staging",
+  "request": {
+    "method": "GET",
+    "path": "/v2/files/file_000000000000000000000000",
+    "contentType": null
+  },
+  "status": 404,
+  "headers": {
+    "content-type": "application/json",
+    "x-request-id": "f6b614d0-03ce-4898-868c-2e35e24e48bf",
+    "retry-after": null,
+    "idempotency-replayed": null
+  },
+  "body": {
+    "detail": "No file 'file_000000000000000000000000'.",
+    "error": {
+      "code": "FILE_NOT_FOUND",
+      "type": "validation",
+      "source": "client",
+      "message": "No file 'file_000000000000000000000000'.",
+      "request_id": "f6b614d0-03ce-4898-868c-2e35e24e48bf"
+    }
+  }
+}

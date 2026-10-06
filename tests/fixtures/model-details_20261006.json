@@ -1,0 +1,3155 @@
+{
+ "Qwen/qwen-image": {
+  "status": 200,
+  "body": {
+   "name": "Qwen/qwen-image",
+   "display_name": "Qwen Image",
+   "tag": "text-to-image",
+   "modes": [
+    "auto",
+    "direct"
+   ],
+   "sources": [
+    "image"
+   ],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/image/qwen/generate",
+    "operation_id": "image_qwen_generate",
+    "model_in_body": true,
+    "model_default": "Qwen/qwen-image",
+    "async_default": false,
+    "streams": false
+   },
+   "request_schema": {
+    "properties": {
+     "store_output": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "provider",
+         "relay1d",
+         "relay7d",
+         "relay30d"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Store Output",
+      "description": "Where this request's output media is hosted, and for how long. `provider` (default) returns a Relay CDN link that live-proxies the provider for 1 hour \u2014 the same hour the task record itself lives. `relay1d` / `relay7d` / `relay30d` copy the output into Relay's own storage and keep BOTH the link and the task record for 1, 7 or 30 days, for a flat per-file fee (see `media_storage` in GET /v2/pricing). Not available on routes that return media inline (base64), and not available to the guest tier.",
+      "default": "provider"
+     },
+     "prompt": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Prompt",
+      "description": "Text description of the image to generate",
+      "example": "A beautiful sunset over mountains"
+     },
+     "model": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Model",
+      "description": "Image generation model. Available: 'Qwen/qwen-image' (default)",
+      "example": "Qwen/qwen-image",
+      "x-relay-models": [
+       "Qwen/qwen-image"
+      ],
+      "default": "Qwen/qwen-image"
+     },
+     "size": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Size",
+      "description": "Output image size in WxH format",
+      "default": "1024x1024",
+      "example": "512x512"
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seed",
+      "description": "Random seed for reproducibility"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode: 'auto' or 'direct' (Qwen is direct-only)",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Return task_id immediately, poll /v2/tasks/{task_id} for result.",
+      "default": false
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "prompt"
+    ],
+    "title": "QwenImageRequest",
+    "description": "Request schema for Qwen text-to-image generation."
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/QwenImageRequest",
+   "request_example": {
+    "prompt": "A beautiful sunset over mountains",
+    "model": "Qwen/qwen-image"
+   },
+   "response_schema": {
+    "properties": {
+     "urls": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Urls",
+      "description": "List of generated image URLs (expire after 7 days)"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model used for generation"
+     },
+     "size": {
+      "type": "string",
+      "title": "Size",
+      "description": "Output image size"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid} or opengpu:{uuid})"
+     },
+     "task_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Address",
+      "description": "Blockchain task address (opengpu mode only, null for direct)"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Execution mode used"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "urls",
+     "model",
+     "size"
+    ],
+    "title": "QwenImageResponse",
+    "description": "Response schema for Qwen image generation"
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/QwenImageResponse",
+   "store_output_supported": true,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [
+    {
+     "mode": "direct",
+     "model": "image.Qwen/qwen-image",
+     "billing_type": "per_image",
+     "per_image": 0.036
+    }
+   ],
+   "available": true,
+   "status": "available"
+  }
+ },
+ "KlingTeam/v3-T2V": {
+  "status": 200,
+  "body": {
+   "name": "KlingTeam/v3-T2V",
+   "display_name": "Kling v3 T2V",
+   "tag": "text-to-video",
+   "modes": [
+    "auto",
+    "direct"
+   ],
+   "sources": [
+    "video"
+   ],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/video/kling-3/t2v",
+    "operation_id": "video_kling_3_t2v",
+    "model_in_body": false,
+    "model_default": null,
+    "async_default": true,
+    "streams": false
+   },
+   "request_schema": {
+    "properties": {
+     "store_output": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "provider",
+         "relay1d",
+         "relay7d",
+         "relay30d"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Store Output",
+      "description": "Where this request's output media is hosted, and for how long. `provider` (default) returns a Relay CDN link that live-proxies the provider for 1 hour \u2014 the same hour the task record itself lives. `relay1d` / `relay7d` / `relay30d` copy the output into Relay's own storage and keep BOTH the link and the task record for 1, 7 or 30 days, for a flat per-file fee (see `media_storage` in GET /v2/pricing). Not available on routes that return media inline (base64), and not available to the guest tier.",
+      "default": "provider"
+     },
+     "prompt": {
+      "type": "string",
+      "maxLength": 2500,
+      "minLength": 1,
+      "title": "Prompt",
+      "description": "Text description of the video to generate"
+     },
+     "aspect_ratio": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "16:9",
+         "9:16",
+         "1:1"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Aspect Ratio",
+      "description": "Video aspect ratio",
+      "default": "16:9"
+     },
+     "duration": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 15.0,
+        "minimum": 3.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Duration",
+      "description": "Video duration in seconds (3-15)",
+      "default": 5
+     },
+     "quality_mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "std",
+         "pro"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Quality Mode",
+      "description": "Generation quality: 'std' (720P) or 'pro' (1080P).",
+      "default": "std"
+     },
+     "sound": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Sound",
+      "description": "Generate native audio (synchronized sound/dialogue from the prompt).",
+      "default": false
+     },
+     "negative_prompt": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 2500
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Negative Prompt",
+      "description": "Things to avoid in the video"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode: 'auto' or 'direct' (video is direct-only)",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Return task_id immediately, poll /v2/tasks/{task_id} for result. Async is the DEFAULT for video (long runtime); set false to block for the result.",
+      "default": true
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "prompt"
+    ],
+    "title": "KlingV3T2VRequest",
+    "description": "Request schema for Kling v3 text-to-video generation."
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/KlingV3T2VRequest",
+   "request_example": {
+    "prompt": "A car driving on a highway"
+   },
+   "response_schema": {
+    "properties": {
+     "urls": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Urls",
+      "description": "List of generated video URLs"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model used",
+      "default": "KlingTeam/v3-T2V"
+     },
+     "aspect_ratio": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Aspect Ratio",
+      "description": "Video aspect ratio"
+     },
+     "duration": {
+      "type": "integer",
+      "title": "Duration",
+      "description": "Video duration in seconds"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid} or opengpu:{uuid})"
+     },
+     "task_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Address",
+      "description": "Blockchain task address (opengpu mode only, null for direct)"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Actual mode used"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "urls",
+     "duration"
+    ],
+    "title": "KlingV3T2VResponse",
+    "description": "Response schema for Kling v3 text-to-video generation"
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/KlingV3T2VResponse",
+   "store_output_supported": true,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [
+    {
+     "mode": "direct",
+     "model": "video.KlingTeam/v3-T2V",
+     "billing_type": "per_second_video",
+     "per_second_video": {
+      "std|silent": 0.084,
+      "std|sound": 0.126,
+      "pro|silent": 0.112,
+      "pro|sound": 0.168,
+      "default": 0.168
+     }
+    }
+   ],
+   "available": true,
+   "status": "available"
+  }
+ },
+ "KlingTeam/v3-Motion-Control": {
+  "status": 200,
+  "body": {
+   "name": "KlingTeam/v3-Motion-Control",
+   "display_name": "Kling v3 Motion Control",
+   "tag": "video-to-video",
+   "modes": [
+    "auto",
+    "direct"
+   ],
+   "sources": [
+    "video"
+   ],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/video/kling-3/motion-control",
+    "operation_id": "video_kling_3_motion_control",
+    "model_in_body": false,
+    "model_default": null,
+    "async_default": true,
+    "streams": false
+   },
+   "request_schema": {
+    "properties": {
+     "store_output": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "provider",
+         "relay1d",
+         "relay7d",
+         "relay30d"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Store Output",
+      "description": "Where this request's output media is hosted, and for how long. `provider` (default) returns a Relay CDN link that live-proxies the provider for 1 hour \u2014 the same hour the task record itself lives. `relay1d` / `relay7d` / `relay30d` copy the output into Relay's own storage and keep BOTH the link and the task record for 1, 7 or 30 days, for a flat per-file fee (see `media_storage` in GET /v2/pricing). Not available on routes that return media inline (base64), and not available to the guest tier.",
+      "default": "provider"
+     },
+     "image_url": {
+      "type": "string",
+      "title": "Image Url",
+      "description": "Reference character image URL. JPG/PNG, max 10MB, 300-65536px, aspect ratio between 1:2.5 and 2.5:1. Must show a clear human character."
+     },
+     "video_url": {
+      "type": "string",
+      "title": "Video Url",
+      "description": "Reference motion video URL. MP4/MOV, max 100MB, 340-3850px, at least 3s (landscape up to 30s, portrait up to 10s). Must feature a person performing the motion to transfer."
+     },
+     "character_orientation": {
+      "type": "string",
+      "enum": [
+       "image",
+       "video"
+      ],
+      "title": "Character Orientation",
+      "description": "Which input decides the character's facing direction: 'image' matches the reference image, 'video' matches the reference video."
+     },
+     "quality_mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "std",
+         "pro"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Quality Mode",
+      "description": "Generation quality: 'std' (standard) or 'pro' (high quality). Priced per tier \u2014 see /v2/pricing.",
+      "default": "std"
+     },
+     "prompt": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 2500
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prompt",
+      "description": "Optional text prompt guiding the generation"
+     },
+     "duration": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "enum": [
+         5,
+         10
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Duration",
+      "description": "Video duration in seconds (5 or 10). Billed per second.",
+      "default": 5
+     },
+     "aspect_ratio": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "16:9",
+         "9:16",
+         "1:1"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Aspect Ratio",
+      "description": "Video aspect ratio",
+      "default": "16:9"
+     },
+     "keep_original_sound": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Keep Original Sound",
+      "description": "Keep the reference video's own audio in the result.",
+      "default": true
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode: 'auto' or 'direct' (video is direct-only)",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Return task_id immediately, poll /v2/tasks/{task_id} for result. Async is the DEFAULT for video (long runtime); set false to block for the result.",
+      "default": true
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "image_url",
+     "video_url",
+     "character_orientation"
+    ],
+    "title": "KlingV3MotionControlRequest",
+    "description": "Request schema for Kling v3 motion control: a character image, a\nreference video, and the character performs the video's motion."
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/KlingV3MotionControlRequest",
+   "request_example": {
+    "image_url": "https://cdn.relaygpu.com/content/fZqlx8XpM0z1nwLfHL9rhQ",
+    "video_url": "https://cdn.relaygpu.com/content/mfatZAj0k2BsS84W9Dp-Pw",
+    "character_orientation": "image"
+   },
+   "response_schema": {
+    "properties": {
+     "urls": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Urls",
+      "description": "List of generated video URLs"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model used",
+      "default": "KlingTeam/v3-Motion-Control"
+     },
+     "aspect_ratio": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Aspect Ratio",
+      "description": "Video aspect ratio"
+     },
+     "duration": {
+      "type": "integer",
+      "title": "Duration",
+      "description": "Video duration in seconds"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid} or opengpu:{uuid})"
+     },
+     "task_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Address",
+      "description": "Blockchain task address (opengpu mode only, null for direct)"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Actual mode used"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "urls",
+     "duration"
+    ],
+    "title": "KlingV3MotionControlResponse",
+    "description": "Response schema for Kling v3 motion-control video generation"
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/KlingV3MotionControlResponse",
+   "store_output_supported": true,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [
+    {
+     "mode": "direct",
+     "model": "video.KlingTeam/v3-Motion-Control",
+     "billing_type": "per_second_video",
+     "per_second_video": {
+      "std|silent": 0.126,
+      "std|sound": 0.126,
+      "pro|silent": 0.168,
+      "pro|sound": 0.168,
+      "default": 0.168
+     }
+    }
+   ],
+   "available": true,
+   "status": "available"
+  }
+ },
+ "black-forest-labs/FLUX-2-pro": {
+  "status": 200,
+  "body": {
+   "name": "black-forest-labs/FLUX-2-pro",
+   "display_name": "FLUX.2 Pro",
+   "tag": "text-to-image",
+   "modes": [
+    "auto",
+    "direct"
+   ],
+   "sources": [
+    "image"
+   ],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/image/flux/generate",
+    "operation_id": "image_flux_generate",
+    "model_in_body": true,
+    "model_default": "black-forest-labs/FLUX-2-pro",
+    "async_default": false,
+    "streams": false
+   },
+   "request_schema": {
+    "properties": {
+     "store_output": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "provider",
+         "relay1d",
+         "relay7d",
+         "relay30d"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Store Output",
+      "description": "Where this request's output media is hosted, and for how long. `provider` (default) returns a Relay CDN link that live-proxies the provider for 1 hour \u2014 the same hour the task record itself lives. `relay1d` / `relay7d` / `relay30d` copy the output into Relay's own storage and keep BOTH the link and the task record for 1, 7 or 30 days, for a flat per-file fee (see `media_storage` in GET /v2/pricing). Not available on routes that return media inline (base64), and not available to the guest tier.",
+      "default": "provider"
+     },
+     "prompt": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Prompt",
+      "description": "Text description of the image to generate",
+      "example": "A red fox in autumn forest"
+     },
+     "model": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Model",
+      "description": "Image generation model. Available: 'black-forest-labs/FLUX-2-pro' (default)",
+      "example": "black-forest-labs/FLUX-2-pro",
+      "x-relay-models": [
+       "black-forest-labs/FLUX-2-pro"
+      ],
+      "default": "black-forest-labs/FLUX-2-pro"
+     },
+     "width": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 2048.0,
+        "minimum": 64.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Width",
+      "description": "Image width in pixels (min 64, must be multiple of 32)",
+      "default": 1024,
+      "example": 1024
+     },
+     "height": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 2048.0,
+        "minimum": 64.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Height",
+      "description": "Image height in pixels (min 64, must be multiple of 32)",
+      "default": 1024,
+      "example": 1024
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seed",
+      "description": "Random seed for reproducible results"
+     },
+     "safety_tolerance": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 6.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Safety Tolerance",
+      "description": "Safety tolerance level (0=strictest, 6=least strict)",
+      "default": 2
+     },
+     "output_format": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "png",
+         "jpeg"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Output Format",
+      "description": "Output image format",
+      "default": "png"
+     },
+     "input_image": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Input Image",
+      "description": "Reference image as base64 string"
+     },
+     "input_image_2": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Input Image 2",
+      "description": "Second reference image as base64 string"
+     },
+     "input_image_3": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Input Image 3",
+      "description": "Third reference image as base64 string"
+     },
+     "input_image_4": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Input Image 4",
+      "description": "Fourth reference image as base64 string"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode: 'auto' or 'direct' (FLUX is direct-only)",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Return task_id immediately, poll /v2/tasks/{task_id} for result.",
+      "default": false
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "prompt"
+    ],
+    "title": "FluxRequest",
+    "description": "Request schema for FLUX image generation.\n\nUses Black Forest Labs FLUX models for high-quality text-to-image generation."
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/FluxRequest",
+   "request_example": {
+    "prompt": "A red fox in autumn forest",
+    "model": "black-forest-labs/FLUX-2-pro"
+   },
+   "response_schema": {
+    "properties": {
+     "images": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Images",
+      "description": "List of generated images as base64 strings"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model used for generation"
+     },
+     "width": {
+      "type": "integer",
+      "title": "Width",
+      "description": "Image width in pixels"
+     },
+     "height": {
+      "type": "integer",
+      "title": "Height",
+      "description": "Image height in pixels"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid} or opengpu:{uuid})"
+     },
+     "task_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Address",
+      "description": "Blockchain task address (opengpu mode only, null for direct)"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Execution mode used"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "images",
+     "model",
+     "width",
+     "height"
+    ],
+    "title": "FluxResponse",
+    "description": "Response schema for FLUX image generation"
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/FluxResponse",
+   "store_output_supported": false,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [
+    {
+     "mode": "direct",
+     "model": "image.black-forest-labs/FLUX-2-pro",
+     "billing_type": "per_image",
+     "per_image": 0.036
+    }
+   ],
+   "available": true,
+   "status": "available"
+  }
+ },
+ "openai/gpt-image-1.5-T2I": {
+  "status": 200,
+  "body": {
+   "name": "openai/gpt-image-1.5-T2I",
+   "display_name": "GPT Image 1.5 T2I",
+   "tag": "text-to-image",
+   "modes": [
+    "auto",
+    "direct"
+   ],
+   "sources": [
+    "image"
+   ],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/image/gpt-image/generate",
+    "operation_id": "image_gpt_image_generate",
+    "model_in_body": false,
+    "model_default": null,
+    "async_default": false,
+    "streams": false
+   },
+   "request_schema": {
+    "properties": {
+     "store_output": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "provider",
+         "relay1d",
+         "relay7d",
+         "relay30d"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Store Output",
+      "description": "Where this request's output media is hosted, and for how long. `provider` (default) returns a Relay CDN link that live-proxies the provider for 1 hour \u2014 the same hour the task record itself lives. `relay1d` / `relay7d` / `relay30d` copy the output into Relay's own storage and keep BOTH the link and the task record for 1, 7 or 30 days, for a flat per-file fee (see `media_storage` in GET /v2/pricing). Not available on routes that return media inline (base64), and not available to the guest tier.",
+      "default": "provider"
+     },
+     "prompt": {
+      "type": "string",
+      "maxLength": 32000,
+      "minLength": 1,
+      "title": "Prompt",
+      "description": "Text description for image generation"
+     },
+     "n": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "enum": [
+         1,
+         2,
+         3,
+         4
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "N",
+      "description": "Number of images to generate (1-4)",
+      "default": 1
+     },
+     "size": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "1024x1024",
+         "1024x1536",
+         "1536x1024"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Size",
+      "description": "Image size",
+      "default": "1024x1024"
+     },
+     "quality": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "low",
+         "medium",
+         "high"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Quality",
+      "description": "Image quality",
+      "default": "medium"
+     },
+     "output_format": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "png",
+         "jpeg",
+         "webp"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Output Format",
+      "description": "Output format",
+      "default": "png"
+     },
+     "output_compression": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 100.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Output Compression",
+      "description": "Compression level (0-100)",
+      "default": 100
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Return task_id immediately, poll /v2/tasks/{task_id} for result.",
+      "default": false
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "prompt"
+    ],
+    "title": "GptImageT2IRequest",
+    "description": "Request schema for GPT Image text-to-image generation."
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/GptImageT2IRequest",
+   "request_example": {
+    "prompt": "A beautiful sunset over mountains"
+   },
+   "response_schema": {
+    "properties": {
+     "images": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Images",
+      "description": "List of generated images as base64 strings"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model used",
+      "default": "openai/gpt-image-1.5-T2I"
+     },
+     "size": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Size",
+      "description": "Image size"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid} or opengpu:{uuid})"
+     },
+     "task_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Address",
+      "description": "Blockchain task address (opengpu mode only, null for direct)"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Actual mode used"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "images"
+    ],
+    "title": "GptImageT2IResponse",
+    "description": "Response schema for GPT Image text-to-image generation"
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/GptImageT2IResponse",
+   "store_output_supported": false,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [
+    {
+     "mode": "direct",
+     "model": "image.openai/gpt-image-1.5-T2I",
+     "billing_type": "per_image",
+     "per_image": 0.036
+    }
+   ],
+   "available": true,
+   "status": "available"
+  }
+ },
+ "Qwen/qwen-image-edit": {
+  "status": 200,
+  "body": {
+   "name": "Qwen/qwen-image-edit",
+   "display_name": "Qwen Image Edit",
+   "tag": "image-to-image",
+   "modes": [
+    "auto",
+    "direct"
+   ],
+   "sources": [
+    "image"
+   ],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/image/qwen/edit",
+    "operation_id": "image_qwen_edit",
+    "model_in_body": true,
+    "model_default": "Qwen/qwen-image-edit",
+    "async_default": false,
+    "streams": false
+   },
+   "request_schema": {
+    "properties": {
+     "store_output": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "provider",
+         "relay1d",
+         "relay7d",
+         "relay30d"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Store Output",
+      "description": "Where this request's output media is hosted, and for how long. `provider` (default) returns a Relay CDN link that live-proxies the provider for 1 hour \u2014 the same hour the task record itself lives. `relay1d` / `relay7d` / `relay30d` copy the output into Relay's own storage and keep BOTH the link and the task record for 1, 7 or 30 days, for a flat per-file fee (see `media_storage` in GET /v2/pricing). Not available on routes that return media inline (base64), and not available to the guest tier.",
+      "default": "provider"
+     },
+     "prompt": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Prompt",
+      "description": "Text description of the edit to apply",
+      "example": "Convert to pencil sketch"
+     },
+     "image": {
+      "type": "string",
+      "title": "Image",
+      "description": "Source image as URL or base64 encoded string",
+      "example": "https://cdn.relaygpu.com/content/Usw6wp8ht34vuLTPh6XHWA"
+     },
+     "model": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Model",
+      "description": "Image editing model. Available: 'Qwen/qwen-image-edit' (default)",
+      "example": "Qwen/qwen-image-edit",
+      "x-relay-models": [
+       "Qwen/qwen-image-edit"
+      ],
+      "default": "Qwen/qwen-image-edit"
+     },
+     "size": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Size",
+      "description": "Output image size in WxH format",
+      "default": "1024x1024",
+      "example": "512x512"
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seed",
+      "description": "Random seed for reproducibility"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode: 'auto' or 'direct' (Qwen is direct-only)",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Return task_id immediately, poll /v2/tasks/{task_id} for result.",
+      "default": false
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "prompt",
+     "image"
+    ],
+    "title": "QwenEditRequest",
+    "description": "Request schema for Qwen image editing."
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/QwenEditRequest",
+   "request_example": {
+    "prompt": "Convert to pencil sketch",
+    "image": "https://cdn.relaygpu.com/content/Usw6wp8ht34vuLTPh6XHWA",
+    "model": "Qwen/qwen-image-edit"
+   },
+   "response_schema": {
+    "properties": {
+     "urls": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Urls",
+      "description": "List of edited image URLs (expire after 7 days)"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model used for editing"
+     },
+     "size": {
+      "type": "string",
+      "title": "Size",
+      "description": "Output image size"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid} or opengpu:{uuid})"
+     },
+     "task_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Address",
+      "description": "Blockchain task address (opengpu mode only, null for direct)"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Execution mode used"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "urls",
+     "model",
+     "size"
+    ],
+    "title": "QwenEditResponse",
+    "description": "Response schema for Qwen image editing"
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/QwenEditResponse",
+   "store_output_supported": true,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [
+    {
+     "mode": "direct",
+     "model": "image.Qwen/qwen-image-edit",
+     "billing_type": "per_image",
+     "per_image": 0.04
+    }
+   ],
+   "available": true,
+   "status": "available"
+  }
+ },
+ "Qwen/qwen3-tts-flash": {
+  "status": 200,
+  "body": {
+   "name": "Qwen/qwen3-tts-flash",
+   "display_name": "Qwen3 TTS Flash",
+   "tag": "text-to-speech",
+   "modes": [
+    "auto",
+    "direct"
+   ],
+   "sources": [
+    "audio"
+   ],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/audio/qwen3-tts-flash/generate",
+    "operation_id": "audio_qwen3_tts_flash_generate",
+    "model_in_body": false,
+    "model_default": null,
+    "async_default": false,
+    "streams": false
+   },
+   "request_schema": {
+    "properties": {
+     "store_output": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "provider",
+         "relay1d",
+         "relay7d",
+         "relay30d"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Store Output",
+      "description": "Where this request's output media is hosted, and for how long. `provider` (default) returns a Relay CDN link that live-proxies the provider for 1 hour \u2014 the same hour the task record itself lives. `relay1d` / `relay7d` / `relay30d` copy the output into Relay's own storage and keep BOTH the link and the task record for 1, 7 or 30 days, for a flat per-file fee (see `media_storage` in GET /v2/pricing). Not available on routes that return media inline (base64), and not available to the guest tier.",
+      "default": "provider"
+     },
+     "input": {
+      "type": "string",
+      "maxLength": 600,
+      "title": "Input",
+      "description": "Text to synthesize (max 600 chars; multilingual supported).",
+      "example": "Hello, this is a quick demo of qwen3-tts-flash."
+     },
+     "voice": {
+      "type": "string",
+      "title": "Voice",
+      "description": "System voice name (e.g. 'Cherry', 'Ethan', 'Serena', 'Chelsie'). Full list: https://help.aliyun.com/zh/model-studio/qwen-tts",
+      "example": "Cherry"
+     },
+     "language_type": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "Chinese",
+         "English",
+         "German",
+         "Italian",
+         "Portuguese",
+         "Spanish",
+         "Japanese",
+         "Korean",
+         "French",
+         "Russian",
+         "Auto"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Language Type",
+      "description": "Optional explicit language override. Defaults to 'Auto' upstream."
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode: 'auto' or 'direct' (TTS is direct-only).",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Async mode: returns task_id immediately, poll /v2/tasks/{task_id} for result.",
+      "default": false
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "input",
+     "voice"
+    ],
+    "title": "Qwen3TtsFlashRequest",
+    "description": "Qwen3-TTS-Flash text-to-speech request (audio source, direct mode only)."
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/Qwen3TtsFlashRequest",
+   "request_example": {
+    "input": "Hello, this is a quick demo of qwen3-tts-flash.",
+    "voice": "Cherry"
+   },
+   "response_schema": {
+    "properties": {
+     "audio_url": {
+      "type": "string",
+      "title": "Audio Url",
+      "description": "Link to the generated audio on cdn.relaygpu.com (lives 1 hour by default; `store_output` keeps it longer)"
+     },
+     "characters": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Characters",
+      "description": "Characters of input text synthesized"
+     },
+     "audio_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Audio Id",
+      "description": "Provider's identifier for the audio"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid})"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Execution mode used (direct)"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "audio_url"
+    ],
+    "title": "Qwen3TtsFlashResponse",
+    "description": "Response schema for qwen3-tts-flash: the audio comes back as a hosted link."
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/Qwen3TtsFlashResponse",
+   "store_output_supported": true,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [
+    {
+     "mode": "direct",
+     "model": "audio.Qwen/qwen3-tts-flash",
+     "billing_type": "per_character",
+     "per_1k_characters": 0.0112
+    }
+   ],
+   "available": true,
+   "status": "available"
+  }
+ },
+ "openai/whisper-1": {
+  "status": 200,
+  "body": {
+   "name": "openai/whisper-1",
+   "display_name": "Whisper-1",
+   "tag": "speech-to-text",
+   "modes": [
+    "auto",
+    "direct"
+   ],
+   "sources": [
+    "audio"
+   ],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/audio/asr/whisper",
+    "operation_id": "audio_asr_whisper",
+    "model_in_body": true,
+    "model_default": null,
+    "async_default": false,
+    "streams": false
+   },
+   "request_schema": {
+    "properties": {
+     "audio_url": {
+      "type": "string",
+      "title": "Audio Url",
+      "description": "URL to audio file (WAV, MP3, M4A, WEBM, FLAC supported)",
+      "example": "https://cdn.relaygpu.com/content/0jTz5Ht994t1szRMSgF1JQ"
+     },
+     "model": {
+      "type": "string",
+      "enum": [
+       "openai/whisper-large-v3",
+       "openai/whisper-1",
+       "openai/gpt-4o-mini-transcribe"
+      ],
+      "title": "Model",
+      "description": "ASR model. Required \u2014 the three differ in price, in response shape and in which options below they honour, so there is no sensible default to pick for you.",
+      "example": "openai/whisper-1",
+      "x-relay-models": [
+       "openai/whisper-1",
+       "openai/gpt-4o-mini-transcribe"
+      ]
+     },
+     "language": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Language",
+      "description": "Language hint (ISO 639-1 code). Auto-detected if not specified. Honoured by all three models.",
+      "example": "en"
+     },
+     "prompt": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prompt",
+      "description": "Text to guide the transcript's style, or to continue a previous segment. whisper-1 and gpt-4o-mini-transcribe only."
+     },
+     "temperature": {
+      "anyOf": [
+       {
+        "type": "number",
+        "maximum": 1.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Temperature",
+      "description": "Sampling temperature (0.0 = deterministic). Honoured by all three models."
+     },
+     "task": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "transcribe",
+         "translate"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task",
+      "description": "Task: 'transcribe' (original language) or 'translate' (to English). whisper-large-v3 only \u2014 the other two always transcribe.",
+      "default": "transcribe"
+     },
+     "return_timestamps": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "string",
+        "const": "word"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Return Timestamps",
+      "description": "Return timestamps: False (none), True (segment-level), 'word' (word-level). whisper-large-v3 only.",
+      "default": false
+     },
+     "chunk_length_s": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 60.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Chunk Length S",
+      "description": "Process audio in chunks of this length in seconds (default: 30). whisper-large-v3 only."
+     },
+     "batch_size": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 32.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Batch Size",
+      "description": "Batch size for processing chunks (default: 16). whisper-large-v3 only."
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode: 'auto' or 'direct' (ASR is direct-only)",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Return task_id immediately, poll /v2/tasks/{task_id} for result. Default: false (synchronous).",
+      "default": false
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "audio_url",
+     "model"
+    ],
+    "title": "ASRRequest",
+    "description": "Request schema for Automatic Speech Recognition (Whisper).\n\nSupports transcription (original language) and translation (to English)."
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/ASRRequest",
+   "request_example": {
+    "model": "openai/whisper-1",
+    "audio_url": "https://cdn.relaygpu.com/content/NyBogi-5y4X2Mo0XHfGbHQ"
+   },
+   "response_schema": {
+    "properties": {
+     "text": {
+      "type": "string",
+      "title": "Text",
+      "description": "Transcribed/translated text"
+     },
+     "language": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Language",
+      "description": "Detected or specified language (not reported by gpt-4o-mini-transcribe)"
+     },
+     "duration": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Duration",
+      "description": "Audio duration in seconds (not reported by gpt-4o-mini-transcribe)"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid} or opengpu:{uuid})"
+     },
+     "task_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Address",
+      "description": "Blockchain task address (opengpu mode only, null for direct)"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Actual mode used (direct)"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "title": "ASRResponse",
+    "description": "Response schema for ASR transcription."
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/ASRResponse",
+   "store_output_supported": false,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [
+    {
+     "mode": "direct",
+     "model": "audio.openai/whisper-1",
+     "billing_type": "per_second_audio",
+     "per_second_audio": 0.0001
+    }
+   ],
+   "available": true,
+   "status": "available"
+  }
+ },
+ "black-forest-labs/FLUX.2-klein-4B": {
+  "status": 200,
+  "body": {
+   "name": "black-forest-labs/FLUX.2-klein-4B",
+   "display_name": null,
+   "tag": null,
+   "modes": [],
+   "sources": [],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/image/flux-1/generate",
+    "operation_id": "image_flux_1_generate",
+    "model_in_body": true,
+    "model_default": "black-forest-labs/FLUX.2-klein-4B",
+    "async_default": false,
+    "streams": false
+   },
+   "request_schema": {
+    "properties": {
+     "store_output": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "provider",
+         "relay1d",
+         "relay7d",
+         "relay30d"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Store Output",
+      "description": "Where this request's output media is hosted, and for how long. `provider` (default) returns a Relay CDN link that live-proxies the provider for 1 hour \u2014 the same hour the task record itself lives. `relay1d` / `relay7d` / `relay30d` copy the output into Relay's own storage and keep BOTH the link and the task record for 1, 7 or 30 days, for a flat per-file fee (see `media_storage` in GET /v2/pricing). Not available on routes that return media inline (base64), and not available to the guest tier.",
+      "default": "provider"
+     },
+     "inputs": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Inputs",
+      "description": "Text prompt for image generation",
+      "example": "A red fox in autumn forest"
+     },
+     "model": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Model",
+      "description": "Image generation model. Default: 'black-forest-labs/FLUX.2-klein-4B'",
+      "example": "black-forest-labs/FLUX.2-klein-4B",
+      "x-relay-models": [
+       "black-forest-labs/FLUX.2-klein-4B"
+      ],
+      "default": "black-forest-labs/FLUX.2-klein-4B"
+     },
+     "width": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 2048.0,
+        "minimum": 64.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Width",
+      "description": "Image width in pixels",
+      "default": 1024,
+      "example": 1024
+     },
+     "height": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 2048.0,
+        "minimum": 64.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Height",
+      "description": "Image height in pixels",
+      "default": 1024,
+      "example": 1024
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seed",
+      "description": "Random seed for reproducible results"
+     },
+     "num_inference_steps": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 50.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Num Inference Steps",
+      "description": "Number of denoising steps (more steps = higher quality, slower)",
+      "default": 4
+     },
+     "guidance_scale": {
+      "anyOf": [
+       {
+        "type": "number",
+        "maximum": 20.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Guidance Scale",
+      "description": "How closely to follow the prompt (higher = more literal)",
+      "default": 0.0
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "opengpu",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode: 'auto' (default), 'direct', or 'opengpu'",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Return task_id immediately, poll /v2/tasks/{task_id} for result.",
+      "default": false
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "inputs"
+    ],
+    "title": "Flux1Request",
+    "description": "Request schema for FLUX.2-klein-4B image generation (`/v2/image/flux-1/generate`).\n\nUses the HuggingFace text-to-image format: the prompt goes in `inputs`."
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/Flux1Request",
+   "request_example": {
+    "inputs": "A red fox in autumn forest",
+    "model": "black-forest-labs/FLUX.2-klein-4B"
+   },
+   "response_schema": {
+    "properties": {
+     "images": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Images",
+      "description": "List of generated images as base64 strings"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model used for generation"
+     },
+     "width": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Width",
+      "description": "Image width in pixels"
+     },
+     "height": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Height",
+      "description": "Image height in pixels"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid} or opengpu:{uuid})"
+     },
+     "task_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Address",
+      "description": "Blockchain task address (opengpu mode only, null for direct)"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Actual mode used (direct/opengpu)"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "images",
+     "model"
+    ],
+    "title": "Flux1Response",
+    "description": "Response schema for FLUX.1-schnell image generation"
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/Flux1Response",
+   "store_output_supported": false,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [],
+   "available": false,
+   "status": "retired"
+  }
+ },
+ "xai/grok-4": {
+  "status": 200,
+  "body": {
+   "name": "xai/grok-4",
+   "display_name": null,
+   "tag": null,
+   "modes": [],
+   "sources": [],
+   "endpoint": null,
+   "request_schema": null,
+   "request_schema_url": null,
+   "request_example": null,
+   "response_schema": null,
+   "response_schema_url": null,
+   "store_output_supported": false,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [],
+   "available": false,
+   "status": "retired"
+  }
+ },
+ "nope/nope": {
+  "status": 404,
+  "body": {
+   "detail": "Model 'nope/nope' not found",
+   "error": {
+    "code": "MODEL_NOT_FOUND",
+    "type": "validation",
+    "source": "client",
+    "message": "Model 'nope/nope' not found",
+    "request_id": "7c8c4ccc-9f2c-44c5-a19d-d30f4424e712"
+   }
+  }
+ },
+ "openai/gpt-5.4": {
+  "status": 200,
+  "body": {
+   "name": "openai/gpt-5.4",
+   "display_name": "GPT-5.4",
+   "tag": "text-to-text",
+   "modes": [
+    "auto",
+    "direct"
+   ],
+   "sources": [
+    "openai"
+   ],
+   "endpoint": {
+    "method": "POST",
+    "path": "/v2/openai/v1/chat/completions",
+    "operation_id": "openai_chat_completions",
+    "model_in_body": true,
+    "model_default": null,
+    "async_default": false,
+    "streams": true
+   },
+   "request_schema": {
+    "properties": {
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model name, case-sensitive, e.g. `openai/gpt-5.4` or `deepseek-ai/DeepSeek-V4-Flash`. Any `text-to-text` model listed under the `openai` source in `GET /v2/models` works here; Claude models use `/v2/anthropic/v1/messages`.",
+      "x-relay-models": [
+       "Qwen/Qwen3.5-35B-A3B-GPTQ-Int4",
+       "Qwen/Qwen3.5-397B-A17B-FP8",
+       "Qwen/Qwen3.6-Plus",
+       "Qwen/Qwen3.8-Max",
+       "deepseek-ai/DeepSeek-V4-Flash",
+       "deepseek-ai/DeepSeek-V4-Pro",
+       "deepseek-ai/DeepSeek-V4.1-Flash",
+       "google/gemini-3.5-flash",
+       "google/gemma-4-26b-a4b-it",
+       "google/gemma-4-31B-turbo",
+       "ibm-granite/granite-4.1-8b",
+       "moonshotai/kimi-k2.6",
+       "moonshotai/kimi-k3",
+       "nvidia/nemotron-3-nano-30b-a3b",
+       "openai/gpt-4o-mini",
+       "openai/gpt-5.4",
+       "openai/gpt-5.4-mini",
+       "openai/gpt-5.5",
+       "openai/gpt-5.5-pro",
+       "openai/gpt-6-astra",
+       "x-ai/grok-4.3",
+       "zai-org/glm-5.1",
+       "zai-org/glm-5.2",
+       "zai-org/glm-5.3"
+      ]
+     },
+     "messages": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Messages",
+      "description": "Array of conversation messages with role and content"
+     },
+     "max_tokens": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 128000.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Max Tokens",
+      "description": "Maximum tokens to generate (deprecated, use max_completion_tokens)"
+     },
+     "max_completion_tokens": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 128000.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Max Completion Tokens",
+      "description": "Maximum tokens to generate including reasoning"
+     },
+     "temperature": {
+      "anyOf": [
+       {
+        "type": "number",
+        "maximum": 2.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Temperature",
+      "description": "Sampling temperature (0.0-2.0). Not supported on Claude 4.7+ models (claude-opus-4-8, claude-opus-5, claude-opus-5-5, claude-sonnet-5, claude-fable-5, claude-fable-5-1); such requests are rejected with 422."
+     },
+     "top_p": {
+      "anyOf": [
+       {
+        "type": "number",
+        "maximum": 1.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Top P",
+      "description": "Nucleus sampling parameter. Not supported on Claude 4.7+ models (claude-opus-4-8, claude-opus-5, claude-opus-5-5, claude-sonnet-5, claude-fable-5, claude-fable-5-1); such requests are rejected with 422."
+     },
+     "frequency_penalty": {
+      "anyOf": [
+       {
+        "type": "number",
+        "maximum": 2.0,
+        "minimum": -2.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Frequency Penalty",
+      "description": "Frequency penalty for token repetition"
+     },
+     "presence_penalty": {
+      "anyOf": [
+       {
+        "type": "number",
+        "maximum": 2.0,
+        "minimum": -2.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Presence Penalty",
+      "description": "Presence penalty for topic repetition"
+     },
+     "stop": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Stop",
+      "description": "Stop sequence(s)"
+     },
+     "stream": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Stream",
+      "description": "Enable streaming responses (SSE format, direct mode only)",
+      "default": false
+     },
+     "response_format": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Response Format",
+      "description": "Output format (e.g. {\"type\": \"json_object\"})"
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seed",
+      "description": "Random seed for deterministic output"
+     },
+     "tools": {
+      "anyOf": [
+       {
+        "items": {
+         "additionalProperties": true,
+         "type": "object"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tools",
+      "description": "Available tools for function calling"
+     },
+     "tool_choice": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tool Choice",
+      "description": "Tool choice strategy"
+     },
+     "n": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 10.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "N",
+      "description": "Number of completions to generate"
+     },
+     "logprobs": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Logprobs",
+      "description": "Return log probabilities of output tokens"
+     },
+     "top_logprobs": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 20.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Top Logprobs",
+      "description": "Number of most likely tokens to return at each position"
+     },
+     "user": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "User",
+      "description": "Unique identifier for the end-user"
+     },
+     "stream_options": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Stream Options",
+      "description": "Streaming options (e.g. {\"include_usage\": true})"
+     },
+     "store": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Store",
+      "description": "Whether to store the output for later use"
+     },
+     "chat_template_kwargs": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Chat Template Kwargs",
+      "description": "Chat template parameters (e.g. {\"enable_thinking\": true} for reasoning models)"
+     },
+     "top_k": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Top K",
+      "description": "Top-K sampling: keep only the top K tokens. Not supported on Claude 4.7+ models (claude-opus-4-8, claude-opus-5, claude-opus-5-5, claude-sonnet-5, claude-fable-5, claude-fable-5-1); such requests are rejected with 422."
+     },
+     "min_p": {
+      "anyOf": [
+       {
+        "type": "number",
+        "maximum": 1.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Min P",
+      "description": "Min-P sampling threshold (0-1)"
+     },
+     "repetition_penalty": {
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Repetition Penalty",
+      "description": "Repetition penalty (1 = none, >1 discourages repeats)"
+     },
+     "logit_bias": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Logit Bias",
+      "description": "Token bias map (token id -> bias)"
+     },
+     "reasoning_effort": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "none",
+         "low",
+         "medium",
+         "high",
+         "xhigh",
+         "max"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reasoning Effort",
+      "description": "Reasoning depth preset (OpenAI-style flat field, reasoning models only). Accepted: none, low, medium, high, xhigh, max. Each model takes its own subset and answers any other value with a 400 \u2014 zai-org/glm-5.3, for example, takes low, high and max only."
+     },
+     "reasoning": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reasoning",
+      "description": "Reasoning controls object (e.g. {\"effort\": \"high\", \"max_tokens\": 2048, \"exclude\": false}); reasoning models only"
+     },
+     "include_reasoning": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Include Reasoning",
+      "description": "Include the reasoning trace in the response (legacy flag; prefer the reasoning object)"
+     },
+     "structured_outputs": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Structured Outputs",
+      "description": "Enforce strict structured outputs when response_format provides a json_schema"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "auto",
+         "opengpu",
+         "direct"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Routing mode: 'auto' (default), 'direct', or 'opengpu'. 'auto' uses direct when your key may, else opengpu \u2014 it does not fail over between modes at run time. Streaming is direct-only.",
+      "default": "auto"
+     },
+     "async": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Async",
+      "description": "Async mode: returns task_id immediately, poll /v2/tasks/{task_id} for result.",
+      "default": false
+     },
+     "webhook_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Webhook Url",
+      "description": "HTTPS URL to receive a signed completion webhook when the async task reaches a terminal state (requires an API key, \"async\": true and direct mode; otherwise 422). See the Webhooks section for the delivery payload and events, and GET /v2/customer/webhook-secret for the signing secret + verification."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "model",
+     "messages"
+    ],
+    "title": "OpenAIChatRequest",
+    "description": "OpenAI Chat Completions API request"
+   },
+   "request_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/OpenAIChatRequest",
+   "request_example": {
+    "model": "openai/gpt-5.4",
+    "messages": [
+     {
+      "role": "user",
+      "content": "Explain the difference between TCP and UDP in simple terms"
+     }
+    ],
+    "max_tokens": 512,
+    "temperature": 0.7
+   },
+   "response_schema": {
+    "properties": {
+     "id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Id",
+      "description": "Unique completion ID"
+     },
+     "object": {
+      "type": "string",
+      "title": "Object",
+      "description": "Object type",
+      "default": "chat.completion"
+     },
+     "created": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Created",
+      "description": "Unix timestamp"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model used"
+     },
+     "choices": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Choices",
+      "description": "Completion choices"
+     },
+     "usage": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Usage",
+      "description": "Token usage statistics"
+     },
+     "system_fingerprint": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "System Fingerprint",
+      "description": "System fingerprint"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id",
+      "description": "Task identifier (direct:{uuid} or opengpu:{uuid})"
+     },
+     "task_address": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Address",
+      "description": "Blockchain task address (opengpu mode only, null for direct)"
+     },
+     "mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mode",
+      "description": "Execution mode used"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "model",
+     "choices"
+    ],
+    "title": "OpenAIChatResponse",
+    "description": "OpenAI Chat Completions API response"
+   },
+   "response_schema_url": "https://relaygpu.com/v2/openapi-public.json#/components/schemas/OpenAIChatResponse",
+   "store_output_supported": false,
+   "restricted_tiers": [
+    "guest"
+   ],
+   "pricing": [
+    {
+     "mode": "direct",
+     "model": "openai.openai/gpt-5.4",
+     "billing_type": "per_token",
+     "per_1m_input_tokens": 2.5,
+     "per_1m_output_tokens": 15.0
+    }
+   ],
+   "available": true,
+   "status": "available"
+  }
+ }
+}

@@ -1,0 +1,23 @@
+{
+ "method": "POST",
+ "path": "/v2/audio/qwen3-tts-flash/generate",
+ "request_body": {
+  "input": "Hello from Relay.",
+  "voice": "Cherry"
+ },
+ "request_headers": [],
+ "status": 200,
+ "headers": {
+  "x-request-id": "0c0d5774-511c-48a7-b1d2-9986b5a8b3d6",
+  "content-type": "application/json"
+ },
+ "ms": 2151,
+ "body": {
+  "audio_url": "https://cdn.relaygpu.com/content/vmlk9qJRd8Q0p4TrBsXoSw",
+  "expires_at": 1791276846,
+  "characters": 17,
+  "audio_id": "audio_e9ae7fcf-7b25-9f4a-9b6e-f84ae12b1173",
+  "mode": "direct",
+  "task_id": "direct:ce9b1e51-0bd8-4858-91b7-a48f82fd7adf"
+ }
+}

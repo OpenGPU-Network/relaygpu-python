@@ -1,0 +1,26 @@
+{
+  "captured": "2026-10-06",
+  "env": "staging",
+  "request": {
+    "method": "POST",
+    "path": "/v2/files",
+    "contentType": "text/plain"
+  },
+  "status": 415,
+  "headers": {
+    "content-type": "application/json",
+    "x-request-id": "1e252f8a-c102-4ff5-b6c2-2ea6196561be",
+    "retry-after": null,
+    "idempotency-replayed": null
+  },
+  "body": {
+    "detail": "Only image/*, video/* and audio/* files can be uploaded.",
+    "error": {
+      "code": "FILE_TYPE_UNSUPPORTED",
+      "type": "validation",
+      "source": "client",
+      "message": "Only image/*, video/* and audio/* files can be uploaded.",
+      "request_id": "1e252f8a-c102-4ff5-b6c2-2ea6196561be"
+    }
+  }
+}

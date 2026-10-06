@@ -1,0 +1,99 @@
+"""``run()`` and the one submit path under it and the family helpers (port of src/submit.ts + src/run.ts): resolve →
+refuse retired → build body → implicit uploads → POST (keyed when async)."""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any
+
+from .._run_common import SubmitResult, accepted_envelope, build_body, resolve_endpoint
+from .._util import random_uuid
+from ..types import AsyncAccepted, Mode, TaskProgress, UploadOptions
+
+if TYPE_CHECKING:
+    from .client import AsyncRelay
+
+__all__ = ["run", "submit"]
+
+
+async def submit(
+    relay: AsyncRelay,
+    model: str,
+    input: Mapping[str, Any],
+    *,
+    mode: Mode | None = None,
+    store_output: str | None = None,
+    webhook_url: str | None = None,
+    idempotency_key: str | None = None,
+    async_: bool | None = None,
+    upload: UploadOptions | None = None,
+    inline_images: bool = False,
+    timeout: float | None = None,
+) -> SubmitResult:
+    """Submits ``input`` to the model's route. An async submit carries ``idempotency_key`` (default: a fresh UUID) and
+    is retried safely; a sync submit carries no key and ``timeout`` is its per-attempt HTTP timeout."""
+    detail = await relay.models.get(model)
+    endpoint = resolve_endpoint(model, detail)
+    body, is_async = build_body(model, input, endpoint, mode=mode, store_output=store_output, webhook_url=webhook_url, async_=async_)
+    body = await relay.files.prepare_inputs(body, upload=upload, inline_images=inline_images, request_schema=detail.get("request_schema"))
+    key = (idempotency_key if idempotency_key is not None else random_uuid()) if is_async else None
+    res = await relay._http.request(
+        endpoint.get("method") or "POST",
+        endpoint["path"],
+        json=body,
+        idempotency_key=key,
+        timeout=None if is_async else timeout,
+    )
+    accepted = accepted_envelope(res.data, res.replayed, res.request_id) if res.status == 202 else None
+    return SubmitResult(data=res.data, accepted=accepted, request_id=res.request_id)
+
+
+async def run(
+    relay: AsyncRelay,
+    model: str,
+    input: Mapping[str, Any],
+    *,
+    wait: bool = True,
+    on_progress: Callable[[TaskProgress], None] | None = None,
+    timeout: float | None = None,
+    mode: Mode | None = None,
+    store_output: str | None = None,
+    webhook_url: str | None = None,
+    idempotency_key: str | None = None,
+    async_: bool | None = None,
+    upload: UploadOptions | None = None,
+    inline_images: bool = False,
+) -> dict[str, Any] | AsyncAccepted:
+    """Runs any model by name. The route, ``model_in_body`` and ``async_default`` come from ``relay.models.get(model)``;
+    a retired or unknown model raises (``ModelRetiredError`` / ``ModelNotFoundError``) before anything is submitted.
+
+    - sync route → the response body;
+    - async route (or ``async_=True``) → waits and returns the task's ``result`` (``TaskFailedError`` on failure);
+    - async with ``wait=False`` → the ``202`` envelope (``AsyncAccepted``, with ``replayed``); narrow with ``is_accepted()``.
+
+    ``timeout`` is the wait budget of an async task (default 20 min) and the per-attempt HTTP timeout of a sync call.
+    """
+    res = await submit(
+        relay,
+        model,
+        input,
+        mode=mode,
+        store_output=store_output,
+        webhook_url=webhook_url,
+        idempotency_key=idempotency_key,
+        async_=async_,
+        upload=upload,
+        inline_images=inline_images,
+        timeout=timeout,
+    )
+    if res.accepted is None:
+        return res.data
+    if not wait:
+        return res.accepted
+    task_id = res.accepted["task_id"]
+    if timeout is None:  # tasks.wait owns the default budget
+        task = await relay.tasks.wait(task_id, on_progress=on_progress)
+    else:
+        task = await relay.tasks.wait(task_id, timeout=timeout, on_progress=on_progress)
+    result = task.get("result")
+    return result if result is not None else {}
