@@ -109,8 +109,9 @@ def encode_json(body: Any) -> bytes:
 
 
 def is_replayable(content: RawBody | None) -> bool:
-    """An iterator body can be sent once; it is never retried."""
-    return content is None or isinstance(content, (bytes, bytearray, memoryview))
+    """An iterator body can be sent once; it is never retried. A body that re-opens its source on each iteration (a
+    ``Path`` upload) says so with ``replayable = True``, like a TS Blob."""
+    return content is None or isinstance(content, (bytes, bytearray, memoryview)) or getattr(content, "replayable", False) is True
 
 
 def read_error_body(res: httpx.Response) -> Any:

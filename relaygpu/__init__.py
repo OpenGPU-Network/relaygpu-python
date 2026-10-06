@@ -7,12 +7,14 @@ from .async_client import AsyncRelay
 from .client import Relay
 from .errors import *  # noqa: F403
 from .errors import __all__ as _errors_all
+from .inputs import INLINE_IMAGE_MAX_BYTES
 
 __version__ = VERSION
 
 __all__ = [
     "DEFAULT_BASE_URL",
     "DEFAULT_TIMEOUT",
+    "INLINE_IMAGE_MAX_BYTES",
     "VERSION",
     "APIResponse",
     "AsyncRelay",
