@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from types import TracebackType
-from typing import Any
+from typing import Any, Literal, overload
 
 import httpx
 
@@ -77,6 +77,60 @@ class AsyncRelay:
     async def health(self) -> HealthResponse:
         """``GET /v2/health``."""
         return await health(self)
+
+    @overload
+    async def run(
+        self,
+        model: str,
+        input: Mapping[str, Any],
+        *,
+        wait: Literal[True] = True,
+        on_progress: Callable[[TaskProgress], None] | None = None,
+        timeout: float | None = None,
+        mode: Mode | None = None,
+        store_output: str | None = None,
+        webhook_url: str | None = None,
+        idempotency_key: str | None = None,
+        async_: bool | None = None,
+        upload: UploadOptions | None = None,
+        inline_images: bool = False,
+    ) -> dict[str, Any]: ...
+
+    @overload
+    async def run(
+        self,
+        model: str,
+        input: Mapping[str, Any],
+        *,
+        wait: Literal[False],
+        on_progress: Callable[[TaskProgress], None] | None = None,
+        timeout: float | None = None,
+        mode: Mode | None = None,
+        store_output: str | None = None,
+        webhook_url: str | None = None,
+        idempotency_key: str | None = None,
+        async_: bool | None = None,
+        upload: UploadOptions | None = None,
+        inline_images: bool = False,
+    ) -> dict[str, Any] | AsyncAccepted: ...
+
+    @overload
+    async def run(
+        self,
+        model: str,
+        input: Mapping[str, Any],
+        *,
+        wait: bool,
+        on_progress: Callable[[TaskProgress], None] | None = None,
+        timeout: float | None = None,
+        mode: Mode | None = None,
+        store_output: str | None = None,
+        webhook_url: str | None = None,
+        idempotency_key: str | None = None,
+        async_: bool | None = None,
+        upload: UploadOptions | None = None,
+        inline_images: bool = False,
+    ) -> dict[str, Any] | AsyncAccepted: ...
 
     async def run(
         self,

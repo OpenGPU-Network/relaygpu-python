@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 from .._exceptions import RelayError
 from ..types import AsyncAccepted, KnownVideoModel, Mode, TaskProgress, TaskStatus, UploadOptions
@@ -19,6 +19,57 @@ class Videos:
 
     def __init__(self, relay: Relay) -> None:
         self._relay = relay
+
+    @overload
+    def generate(
+        self,
+        model: KnownVideoModel | str,
+        input: Mapping[str, Any],
+        *,
+        wait: Literal[False] = False,
+        on_progress: Callable[[TaskProgress], None] | None = None,
+        timeout: float | None = None,
+        mode: Mode | None = None,
+        store_output: str | None = None,
+        webhook_url: str | None = None,
+        idempotency_key: str | None = None,
+        upload: UploadOptions | None = None,
+        inline_images: bool = False,
+    ) -> AsyncAccepted: ...
+
+    @overload
+    def generate(
+        self,
+        model: KnownVideoModel | str,
+        input: Mapping[str, Any],
+        *,
+        wait: Literal[True],
+        on_progress: Callable[[TaskProgress], None] | None = None,
+        timeout: float | None = None,
+        mode: Mode | None = None,
+        store_output: str | None = None,
+        webhook_url: str | None = None,
+        idempotency_key: str | None = None,
+        upload: UploadOptions | None = None,
+        inline_images: bool = False,
+    ) -> TaskStatus: ...
+
+    @overload
+    def generate(
+        self,
+        model: KnownVideoModel | str,
+        input: Mapping[str, Any],
+        *,
+        wait: bool,
+        on_progress: Callable[[TaskProgress], None] | None = None,
+        timeout: float | None = None,
+        mode: Mode | None = None,
+        store_output: str | None = None,
+        webhook_url: str | None = None,
+        idempotency_key: str | None = None,
+        upload: UploadOptions | None = None,
+        inline_images: bool = False,
+    ) -> AsyncAccepted | TaskStatus: ...
 
     def generate(
         self,
