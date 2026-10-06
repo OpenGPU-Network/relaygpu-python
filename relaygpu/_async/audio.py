@@ -1,13 +1,88 @@
-"""STUB (lead scaffold): the owning package replaces this file."""
+"""Text-to-speech and speech-to-text (port of src/audio.ts)."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, cast
+
+from ..types import KnownSpeechModel, KnownTranscribeModel, Mode, TaskProgress, UploadOptions
+from .run import run
 
 if TYPE_CHECKING:
     from .client import AsyncRelay
 
 
 class AsyncAudio:
+    """Text-to-speech and speech-to-text. Same options as the image helpers: an async answer (``async_=True``) is
+    waited for."""
+
     def __init__(self, relay: AsyncRelay) -> None:
         self._relay = relay
+
+    async def speech(
+        self,
+        model: KnownSpeechModel | str,
+        input: Mapping[str, Any],
+        *,
+        on_progress: Callable[[TaskProgress], None] | None = None,
+        timeout: float | None = None,
+        mode: Mode | None = None,
+        store_output: str | None = None,
+        webhook_url: str | None = None,
+        idempotency_key: str | None = None,
+        async_: bool | None = None,
+        upload: UploadOptions | None = None,
+        inline_images: bool = False,
+    ) -> dict[str, Any]:
+        """Text-to-speech. Returns the response body: ``audio_url`` (a link that expires) or ``audio_base64`` +
+        ``content_type``, per model."""
+        out = await run(
+            self._relay,
+            model,
+            input,
+            wait=True,
+            on_progress=on_progress,
+            timeout=timeout,
+            mode=mode,
+            store_output=store_output,
+            webhook_url=webhook_url,
+            idempotency_key=idempotency_key,
+            async_=async_,
+            upload=upload,
+            inline_images=inline_images,
+        )
+        return cast("dict[str, Any]", out)
+
+    async def transcribe(
+        self,
+        model: KnownTranscribeModel | str,
+        input: Mapping[str, Any],
+        *,
+        on_progress: Callable[[TaskProgress], None] | None = None,
+        timeout: float | None = None,
+        mode: Mode | None = None,
+        store_output: str | None = None,
+        webhook_url: str | None = None,
+        idempotency_key: str | None = None,
+        async_: bool | None = None,
+        upload: UploadOptions | None = None,
+        inline_images: bool = False,
+    ) -> dict[str, Any]:
+        """Speech-to-text. ``audio_url`` may be a link or bytes / a path / a file-like object (uploaded first). Returns
+        ``{text, language?, duration?}``."""
+        out = await run(
+            self._relay,
+            model,
+            input,
+            wait=True,
+            on_progress=on_progress,
+            timeout=timeout,
+            mode=mode,
+            store_output=store_output,
+            webhook_url=webhook_url,
+            idempotency_key=idempotency_key,
+            async_=async_,
+            upload=upload,
+            inline_images=inline_images,
+        )
+        return cast("dict[str, Any]", out)

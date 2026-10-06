@@ -9,9 +9,9 @@ from typing import Any
 
 import httpx
 
-from .._core import Query, RawBody, RetryOptions
+from .._core import _UNSET, Query, RawBody, RetryOptions
 from ..types import AsyncAccepted, CostEstimate, HealthResponse, Mode, TaskProgress, UploadOptions, UsageInput
-from ._http import _UNSET, HttpClient
+from ._http import HttpClient
 from .account import Account
 from .audio import Audio
 from .estimate import estimate_cost

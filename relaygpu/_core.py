@@ -19,6 +19,9 @@ DEFAULT_TIMEOUT = 600.0
 
 T = TypeVar("T")
 
+_UNSET: Any = object()
+"""The "no JSON body" default of `request(json=...)`; one object shared by both clients."""
+
 QueryValue = Union[str, int, float, bool, Sequence[str], None]
 Query = Mapping[str, QueryValue]
 RawBody = Union[bytes, Iterable[bytes], AsyncIterable[bytes]]

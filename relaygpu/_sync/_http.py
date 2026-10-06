@@ -10,6 +10,7 @@ from typing import Any
 import httpx
 
 from .._core import (
+    _UNSET,
     DEFAULT_BASE_URL,
     DEFAULT_TIMEOUT,
     APIResponse,
@@ -29,8 +30,6 @@ from .._core import (
 from .._errors import error_from_response
 from .._exceptions import APIConnectionError, APITimeoutError
 from .._sleep import sync_sleep
-
-_UNSET: Any = object()
 
 
 class HttpClient:
