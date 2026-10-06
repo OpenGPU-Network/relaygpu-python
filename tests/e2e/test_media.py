@@ -13,6 +13,7 @@ run `pytest -m e2e tests/e2e/test_media.py tests/e2e/test_files.py` in that orde
 from __future__ import annotations
 
 import json
+import math
 import re
 from collections.abc import Callable
 from typing import Any
@@ -63,7 +64,8 @@ def test_a1_a8_a_generated_key_rides_the_async_video_submit_wait_long_polls_in_a
     assert submit.idem and re.match(r"^[0-9a-f-]{36}$", submit.idem)
     polls = [x for x in c.calls if "/v2/tasks/" in x.url]
     assert all(re.search(r"[?&]wait=\d+", x.url) for x in polls)
-    assert len(polls) <= 5  # A1: each long-poll is held ≤ 30 s
+    # A1: each long-poll is held ≤ 30 s, so the count scales with the task's length (ceil(elapsed/30) + 2, as the TS test).
+    assert len(polls) <= math.ceil(int(t["elapsed_seconds"]) / 30) + 2
     assert seen[-1] == "completed"
     global VIDEO_URL
     VIDEO_URL = t["result"]["urls"][0]
