@@ -1,0 +1,26 @@
+name: drift
+# N5: regenerate relaygpu/_generated/ from the PUBLIC spec; any diff fails. The spec is a keyless public
+# document, so the job reads the one the package is published against (prod's public spec) from a
+# GitHub-hosted runner; no VPN runner needed. Set the repo variable RELAY_SPEC_URL to point it
+# elsewhere (e.g. staging's copy from a runner on the VPN).
+on:
+  push:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      # scripts/gen.py is stdlib only: no install step.
+      - run: python scripts/gen.py
+        env:
+          RELAY_SPEC_URL: ${{ vars.RELAY_SPEC_URL || 'https://relaygpu.com/v2/openapi-public.json' }}
+      - name: Fail on drift
+        run: |
+          git add -N relaygpu/_generated
+          git diff --stat --exit-code -- relaygpu/_generated/

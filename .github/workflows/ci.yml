@@ -1,0 +1,82 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - name: mypy (strict on the package, per pyproject)
+        run: mypy
+      - name: mypy --strict on the examples (the public import surface as users write it; 06 needs openai)
+        run: mypy --strict examples/0[1-5]*.py
+      - name: _sync/ is what scripts/unasync.py generates from _async/
+        run: python scripts/unasync.py --check
+      - name: Unit tests (addopts deselect the billed e2e suite)
+        run: pytest
+      - name: Examples compile; the webhook receiver self-tests offline
+        run: |
+          python -m py_compile examples/*.py
+          python examples/04_webhook_receiver.py --self-test
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Two interpreters for the install check; the last one set up (3.13) is the default `python`.
+      - uses: actions/setup-python@v5
+        id: py310
+        with: { python-version: "3.10" }
+      - uses: actions/setup-python@v5
+        id: py313
+        with: { python-version: "3.13" }
+      - run: python -m pip install --upgrade pip build twine
+      - run: python -m build
+      - run: twine check --strict dist/*
+      - name: Wheel contents (py.typed in, no tests/ or .env)
+        run: |
+          python - <<'PY'
+          import glob, sys, zipfile
+          (whl,) = glob.glob("dist/*.whl")
+          names = zipfile.ZipFile(whl).namelist()
+          problems = []
+          if "relaygpu/py.typed" not in names:
+              problems.append("relaygpu/py.typed missing")
+          bad = [n for n in names if n.startswith("tests/") or "/tests/" in n or n.rsplit("/", 1)[-1].startswith(".env")]
+          if bad:
+              problems.append(f"unexpected files: {bad}")
+          print(whl, len(names), "files")
+          sys.exit("\n".join(problems) if problems else 0)
+          PY
+      - name: sdist carries no .env
+        run: |
+          python - <<'PY'
+          import glob, sys, tarfile
+          (sd,) = glob.glob("dist/*.tar.gz")
+          bad = [n for n in tarfile.open(sd).getnames() if n.rsplit("/", 1)[-1].startswith(".env")]
+          sys.exit(f"unexpected files: {bad}" if bad else 0)
+          PY
+      - name: Install the built wheel in fresh venvs (3.10, 3.13), outside the source tree
+        run: |
+          WHEEL="$(ls "$PWD"/dist/*.whl)"
+          for PY in "${{ steps.py310.outputs.python-path }}" "${{ steps.py313.outputs.python-path }}"; do
+            VENV="$(mktemp -d)/venv"
+            "$PY" -m venv "$VENV"
+            "$VENV/bin/pip" install --quiet "$WHEEL"
+            (cd "$(mktemp -d)" && "$VENV/bin/python" -c "import relaygpu; from relaygpu import Relay, AsyncRelay; print(relaygpu.VERSION)")
+          done
