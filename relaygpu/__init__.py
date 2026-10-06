@@ -8,6 +8,7 @@ from .client import Relay
 from .errors import *  # noqa: F403
 from .errors import __all__ as _errors_all
 from .inputs import INLINE_IMAGE_MAX_BYTES
+from .webhooks import verify_webhook
 
 __version__ = VERSION
 
@@ -20,5 +21,6 @@ __all__ = [
     "AsyncRelay",
     "Relay",
     "RetryOptions",
+    "verify_webhook",
     *_errors_all,
 ]

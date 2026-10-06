@@ -21,6 +21,18 @@ from ._generated.types import (
     TiersResponse,
     WorkflowRunState,
 )
+from ._shapes import WorkflowList, WorkflowRunSubmitted, WorkflowTemplate
+from .webhooks import (
+    InstanceEventName,
+    InstanceWebhookEvent,
+    TaskWebhookEvent,
+    WebhookDeliveryListParams,
+    WebhookEvent,
+    WebhookEventName,
+    WebhookHeaders,
+    WebhookSecret,
+    WorkflowWebhookEvent,
+)
 
 if TYPE_CHECKING:
     from typing import TypeAlias
@@ -120,6 +132,8 @@ __all__ = [
     "FileListResponse",
     "FileObject",
     "HealthResponse",
+    "InstanceEventName",
+    "InstanceWebhookEvent",
     "KnownImageModel",
     "KnownSpeechModel",
     "KnownTranscribeModel",
@@ -135,8 +149,18 @@ __all__ = [
     "StoreOutput",
     "TaskProgress",
     "TaskStatus",
+    "TaskWebhookEvent",
     "TiersResponse",
     "UploadOptions",
     "UsageInput",
+    "WebhookDeliveryListParams",
+    "WebhookEvent",
+    "WebhookEventName",
+    "WebhookHeaders",
+    "WebhookSecret",
+    "WorkflowList",
     "WorkflowRunState",
+    "WorkflowRunSubmitted",
+    "WorkflowTemplate",
+    "WorkflowWebhookEvent",
 ]
