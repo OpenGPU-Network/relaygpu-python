@@ -3,13 +3,12 @@ the MAGIC mime sniffer, the ``output_format`` hint and the walk over every image
 
 from __future__ import annotations
 
-import base64
-import binascii
 import re
 from collections.abc import Mapping
 from typing import Any
 
 from ._exceptions import RelayError
+from ._util import forgiving_b64decode
 
 MAGIC: list[tuple[str, str]] = [
     ("iVBORw0KGgo", "image/png"),
@@ -22,8 +21,6 @@ FORMAT_MIME: dict[str, str] = {"png": "image/png", "jpeg": "image/jpeg", "jpg": 
 
 _DATA_URI = re.compile(r"^data:([^;,]+)?(;base64)?,", re.I)
 _HTTP_URL = re.compile(r"^https?://", re.I)
-_ASCII_WS = re.compile(r"[\t\n\f\r ]")
-_B64_CHARS = re.compile(r"^[A-Za-z0-9+/]*$")
 
 
 def download_error(status: int) -> RelayError:
@@ -41,16 +38,11 @@ def parse_image_value(value: str, mime_hint: str | None = None) -> tuple[str | N
 
 
 def decode_b64(b64: str) -> bytes:
-    """``atob`` semantics (the WHATWG forgiving-base64 decode): ASCII whitespace ignored, padding optional."""
-    s = _ASCII_WS.sub("", b64.strip())
-    if len(s) % 4 == 0 and s.endswith("="):
-        s = s[:-2] if s.endswith("==") else s[:-1]
-    if len(s) % 4 == 1 or not _B64_CHARS.match(s):
+    """``atob(b64.trim())``: the forgiving-base64 decode of the trimmed value."""
+    out = forgiving_b64decode(b64.strip())
+    if out is None:
         raise RelayError("Image payload is not valid base64")
-    try:
-        return base64.b64decode(s + "=" * (-len(s) % 4), validate=True)
-    except (binascii.Error, ValueError):
-        raise RelayError("Image payload is not valid base64") from None
+    return out
 
 
 def image_values(body: Mapping[str, Any], input: Mapping[str, Any] | None = None) -> tuple[list[str], str | None]:

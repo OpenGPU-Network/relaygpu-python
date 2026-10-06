@@ -18,7 +18,8 @@ from relaygpu import (
     RateLimitError,
     Relay,
 )
-from tests.helpers import KEY, Mock, json_reply, maybe, relay_error
+from relaygpu._core import query_params
+from tests.helpers import KEY, Mock, agen, json_reply, maybe, relay_error
 
 
 async def req(r: Any, method: str, path: str, **kw: Any) -> Any:
@@ -165,7 +166,7 @@ class TestRetryPolicy:
 
     async def test_iterator_body_is_sent_once_never_retried(self, make: Any) -> None:
         m = Mock(relay_error(500, "INTERNAL_ERROR"), json_reply(201, {}))
-        body: Any = iter([b"ab", b"cd"]) if make.kind == "sync" else _agen([b"ab", b"cd"])
+        body: Any = iter([b"ab", b"cd"]) if make.kind == "sync" else agen(b"ab", b"cd")
         with pytest.raises(Exception):  # noqa: B017
             await req(make(m), "POST", "/v2/files", content=body, content_type="video/mp4", idempotency_key="k")
         assert len(m.calls) == 1 and m.calls[0].raw == b"abcd"
@@ -210,11 +211,6 @@ class TestRetryPolicy:
         assert seen == [12.5]
 
 
-async def _agen(chunks: list[bytes]) -> Any:
-    for ch in chunks:
-        yield ch
-
-
 async def test_async_cancellation_propagates_and_is_never_retried() -> None:
     started = asyncio.Event()
     calls = 0
@@ -250,3 +246,17 @@ def test_context_managers_close_owned_clients_only() -> None:
         assert ainner.is_closed
 
     asyncio.run(main())
+
+
+def test_query_params_sends_a_keyword_spelled_with_one_trailing_underscore_as_the_keyword() -> None:
+    """``from_`` (the keyword-argument spelling) is sent as ``from``; only one ``_`` and only for a Python keyword."""
+    q = {"from_": "2026-10-01", "to": "x", "class__": "a", "limit_": 3, "flag": True, "skip": None, "ids": ["a", "b"]}
+    assert query_params(q) == [
+        ("from", "2026-10-01"),
+        ("to", "x"),
+        ("class__", "a"),
+        ("limit_", "3"),
+        ("flag", "true"),
+        ("ids", "a"),
+        ("ids", "b"),
+    ]

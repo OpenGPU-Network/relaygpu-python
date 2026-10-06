@@ -6,6 +6,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, cast
 
+from .._core import _UNSET
 from .._generated.error_codes import KeyNotFoundError
 from .._generated.types import (
     CreateKeyRequest,
@@ -39,14 +40,12 @@ class Keys:
     def __init__(self, relay: Relay) -> None:
         self._relay = relay
 
-    def _call(self, method: str, path: str, body: Any = None) -> Any:
-        if body is None:
-            return (self._relay._http.request(method, path)).data
+    def _call(self, method: str, path: str, body: Any = _UNSET) -> Any:
         return (self._relay._http.request(method, path, json=body)).data
 
     def list(self, **params: Unpack[KeyListParams]) -> KeyListResponse:
         """``GET /v2/customer/keys``: newest first, secrets masked. Page with ``starting_after`` = ``next_cursor``."""
-        res = self._relay._http.request("GET", "/v2/customer/keys", query=cast("dict[str, Any]", params))
+        res = self._relay._http.request("GET", "/v2/customer/keys", query=params)
         return cast(KeyListResponse, res.data)
 
     def list_all(self, **params: Unpack[KeyListAllParams]) -> Iterator[KeyResponse]:

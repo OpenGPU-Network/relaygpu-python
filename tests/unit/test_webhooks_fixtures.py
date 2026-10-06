@@ -1,52 +1,32 @@
 """Port of test/unit/webhooks.fixtures.test.ts (A4): verify the real staging deliveries captured by the EM.
 
-The secret is ``RELAY_WEBHOOK_SECRET`` from the environment, else from the repo's gitignored ``.env`` (read here, the same
-parsing as tests/e2e/conftest.py, without touching ``os.environ``). Absent → the tests SKIP. Values are never printed.
+The secret is ``RELAY_WEBHOOK_SECRET`` from the environment, else from the repo's gitignored ``.env`` (``helpers.dotenv``,
+the e2e suite's parsing, without touching ``os.environ``). Absent → the tests SKIP. Values are never printed.
 """
 
 from __future__ import annotations
 
-import base64
-import hashlib
-import hmac
-import json
-import os
 import re
-from pathlib import Path
 from typing import Any
 
 import pytest
 
 from relaygpu.webhooks import WebhookVerificationError, verify_webhook
+from tests.helpers import FIXTURES, dotenv, env, load, new_secret, sign
 
-ROOT = Path(__file__).resolve().parents[2]
-DIR = ROOT / "tests" / "fixtures" / "webhooks"
-
-
-def _secret() -> str | None:
-    if os.environ.get("RELAY_WEBHOOK_SECRET"):
-        return os.environ["RELAY_WEBHOOK_SECRET"]
-    p = ROOT / ".env"
-    if p.exists():
-        for line in p.read_text("utf-8").splitlines():
-            m = re.match(r"^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$", line)
-            if m and m.group(1) == "RELAY_WEBHOOK_SECRET":
-                return m.group(2).strip().strip('"').strip("'") or None
-    return None
-
-
-SECRET = _secret()
+DIR = FIXTURES / "webhooks"
+SECRET = env("RELAY_WEBHOOK_SECRET") or dotenv().get("RELAY_WEBHOOK_SECRET") or None
 FILES = sorted(DIR.glob("*.json")) if DIR.exists() else []
-FIXTURES = [(f.name, json.loads(f.read_text("utf-8"))) for f in FILES]
+CAPTURES = [(f.name, load(f"webhooks/{f.name}")) for f in FILES]
 
 pytestmark = pytest.mark.skipif(not FILES or not SECRET, reason="no webhook fixtures or RELAY_WEBHOOK_SECRET absent")
 
 
 def test_both_captured_fixtures_are_present() -> None:
-    assert {name for name, _ in FIXTURES} >= {"task.completed.json", "workflow.completed.json"}
+    assert {name for name, _ in CAPTURES} >= {"task.completed.json", "workflow.completed.json"}
 
 
-@pytest.mark.parametrize(("name", "fx"), FIXTURES, ids=[n for n, _ in FIXTURES])
+@pytest.mark.parametrize(("name", "fx"), CAPTURES, ids=[n for n, _ in CAPTURES])
 class TestFixture:
     def test_verifies_and_carries_its_event(self, name: str, fx: dict[str, Any]) -> None:
         now = int(fx["headers"]["webhook-timestamp"])
@@ -67,10 +47,9 @@ class TestFixture:
     def test_current_previous_pair_accepted(self, name: str, fx: dict[str, Any]) -> None:
         # A9 rotation: the real secret as `previous` next to a throwaway `current`, and a delivery signed by both.
         now = int(fx["headers"]["webhook-timestamp"])
-        throwaway = "whsec_" + base64.b64encode(os.urandom(24)).decode()
+        throwaway = new_secret()
         h = fx["headers"]
-        signed = f"{h['webhook-id']}.{h['webhook-timestamp']}.{fx['body']}".encode()
-        extra = "v1," + base64.b64encode(hmac.new(base64.b64decode(throwaway[6:]), signed, hashlib.sha256).digest()).decode()
+        extra = sign(throwaway, h["webhook-id"], h["webhook-timestamp"], fx["body"])
         assert verify_webhook(fx["body"], h, [throwaway, SECRET or ""], now=now)["event"] == fx["event"]
         both = {**h, "webhook-signature": f"{extra} {h['webhook-signature']}"}
         assert verify_webhook(fx["body"], both, [throwaway, SECRET or ""], now=now)["event"] == fx["event"]

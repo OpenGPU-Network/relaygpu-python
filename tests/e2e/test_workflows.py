@@ -7,18 +7,10 @@ from __future__ import annotations
 import time
 from typing import Any
 
-import pytest
-
 from relaygpu import Relay, RelayAPIError
-from tests.e2e.conftest import API_KEY, BASE_URL
 
 WORKFLOW = "script-voiceover"
 WEBHOOK_URL = "https://example.com/relay-sdk-e2e"
-
-
-@pytest.fixture
-def relay() -> Relay:
-    return Relay(api_key=API_KEY, base_url=BASE_URL)
 
 
 def test_list_get_are_public_and_the_cheapest_workflow_is_the_expected_chain(relay: Relay) -> None:

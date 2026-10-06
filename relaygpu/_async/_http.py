@@ -8,12 +8,13 @@ from typing import Any
 
 import httpx
 
+from .. import _clock
 from .._core import (
     _UNSET,
     DEFAULT_BASE_URL,
     DEFAULT_TIMEOUT,
+    USER_AGENT,
     APIResponse,
-    Query,
     RawBody,
     RetryOptions,
     RetryPolicy,
@@ -25,10 +26,11 @@ from .._core import (
     parse_ok,
     query_params,
     read_error_body,
+    transport_errors,
 )
 from .._errors import error_from_response
 from .._exceptions import APIConnectionError, APITimeoutError
-from .._sleep import async_sleep
+from .._images import download_error
 
 
 class AsyncHttpClient:
@@ -68,7 +70,7 @@ class AsyncHttpClient:
         method: str,
         path: str,
         *,
-        query: Query | None = None,
+        query: Mapping[str, Any] | None = None,  # a Query, or a params TypedDict (only Mapping[str, Any] takes those)
         json: Any = _UNSET,
         content: RawBody | None = None,
         content_type: str | None = None,
@@ -92,7 +94,7 @@ class AsyncHttpClient:
             hdrs["Content-Type"] = "application/json"
         state = RetryState(self.retry, is_get, not is_get and idempotency_key is not None, is_replayable(body))
         url = self.url(path)
-        params: list[tuple[str, str | int | float | bool | None]] = list(query_params(query))
+        params: list[tuple[str, str | int | float | bool | None]] = list(query_params(query))  # list is invariant: widen for httpx
         t = timeout if timeout is not None else self.timeout
         while True:
             try:
@@ -101,7 +103,7 @@ class AsyncHttpClient:
                 wait = state.after_transport_error()
                 if wait is None:
                     raise
-                await async_sleep(wait)
+                await _clock.async_sleep(wait)
                 continue
             if res.is_success:
                 return parse_ok(res)
@@ -109,7 +111,7 @@ class AsyncHttpClient:
             wait = state.after_error(res.status_code, err.code, err.retry_after)
             if wait is None:
                 raise err
-            await async_sleep(wait)
+            await _clock.async_sleep(wait)
 
     async def _send(
         self,
@@ -121,7 +123,7 @@ class AsyncHttpClient:
         timeout: float,
         path: str,
     ) -> httpx.Response:
-        try:
+        with transport_errors(f"Request timed out after {timeout:g} s: {method} {path}", f"Connection error: {method} {path}"):
             res = await self._client.request(
                 method,
                 url,
@@ -131,9 +133,14 @@ class AsyncHttpClient:
                 timeout=timeout,
             )
             await res.aread()
-            return res
-        except httpx.TimeoutException:
-            # `from None`: the httpx exception holds the request, and the request holds the credential.
-            raise APITimeoutError(f"Request timed out after {timeout:g} s: {method} {path}") from None
-        except httpx.TransportError as e:
-            raise APIConnectionError(f"Connection error: {method} {path}: {type(e).__name__}: {e}") from None
+        return res
+
+    async def download(self, url: str) -> bytes:
+        """GETs an absolute result link (an output image) over the same transport. Never with the credential or the
+        client's default headers (only ``User-Agent``); redirects followed; never retried."""
+        with transport_errors(f"Image download timed out: {url}", "Image download failed"):
+            res = await self._client.get(url, headers={"User-Agent": USER_AGENT}, timeout=self.timeout, follow_redirects=True)
+            await res.aread()
+        if not res.is_success:
+            raise download_error(res.status_code)
+        return res.content

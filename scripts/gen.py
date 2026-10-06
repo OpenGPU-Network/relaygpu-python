@@ -56,13 +56,7 @@ def pascal(s: str) -> str:
 
 
 def py_literal(v: Any) -> str:
-    if v is None:
-        return "None"
-    if isinstance(v, bool):
-        return "True" if v else "False"
-    if isinstance(v, str):
-        return json.dumps(v)
-    return repr(v)
+    return json.dumps(v) if isinstance(v, str) else repr(v)
 
 
 class TypeGen:
@@ -72,20 +66,15 @@ class TypeGen:
         self.schemas = schemas
         self.blocks: list[str] = []
         self.names: set[str] = set(schemas)
-        self.used_any = False
-
-    def ref(self, r: str) -> str:
-        return r.rsplit("/", 1)[-1]
 
     def expr(self, s: Any, hint: str) -> str:
         """A type expression for schema `s`; `hint` names an inline object if one is needed."""
         if s is True or s is None or s == {}:
-            self.used_any = True
             return "Any"
         if s is False:
             return "None"
         if "$ref" in s:
-            return self.ref(s["$ref"])
+            return str(s["$ref"]).rsplit("/", 1)[-1]
         if "const" in s:
             return f"Literal[{py_literal(s['const'])}]"
         if "enum" in s:
@@ -97,7 +86,6 @@ class TypeGen:
                 if key == "allOf" and len(s[key]) == 1:
                     return self.expr(s[key][0], hint)
                 if key == "allOf":
-                    self.used_any = True
                     return "dict[str, Any]"
                 parts = [self.expr(m, f"{hint}{i}" if i else hint) for i, m in enumerate(s[key])]
                 return self.union(parts)
@@ -122,11 +110,9 @@ class TypeGen:
                 self.typeddict(name, s)
                 return name
             ap = s.get("additionalProperties")
-            self.used_any = True
             if isinstance(ap, dict) and ap:
                 return f"dict[str, {self.expr(ap, hint + 'Value')}]"
             return "dict[str, Any]"
-        self.used_any = True
         return "Any"
 
     def union(self, parts: list[str]) -> str:
@@ -208,7 +194,7 @@ class TypeGen:
             "",
         ]
         body = "\n\n\n".join(self.blocks)
-        names = sorted(n for n in self.names)
+        names = sorted(self.names)
         tail = ["", "", "__all__ = ["] + [f"    {json.dumps(n)}," for n in names] + ["]", ""]
         return "\n".join(head) + body + "\n".join(tail)
 
@@ -287,7 +273,7 @@ def gen_errors(spec: dict[str, Any]) -> tuple[str, list[str]]:
     exported: list[str] = []
     for code in codes:
         status = statuses.get(code)
-        base = BASES.get(status, "RelayAPIError") if status else "RelayAPIError"
+        base = BASES.get(status, "RelayAPIError")  # an unmapped code (None) gets the default
         name = class_name(code)
         if name == base:  # the code IS the base (e.g. VALIDATION_ERROR)
             table.append(f"    {json.dumps(code)}: {base},")

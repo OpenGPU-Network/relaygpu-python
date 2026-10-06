@@ -7,7 +7,6 @@ from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, Any
 
 from .._exceptions import RelayError
-from .._run_common import DEFAULT_WAIT_TIMEOUT
 from ..types import AsyncAccepted, KnownVideoModel, Mode, TaskProgress, TaskStatus, UploadOptions
 from .run import submit
 
@@ -59,6 +58,7 @@ class Videos:
             )
         if not wait:
             return res.accepted
-        return self._relay.tasks.wait(
-            res.accepted["task_id"], timeout=timeout if timeout is not None else DEFAULT_WAIT_TIMEOUT, on_progress=on_progress
-        )
+        task_id = res.accepted["task_id"]
+        if timeout is None:  # tasks.wait owns the default budget
+            return self._relay.tasks.wait(task_id, on_progress=on_progress)
+        return self._relay.tasks.wait(task_id, timeout=timeout, on_progress=on_progress)

@@ -12,40 +12,13 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, cast
 
 from ._exceptions import RelayError
+from ._util import js_number
 from .types import CostEstimate, PricingResponse, UsageInput
 
 M = 1_000_000
 
 Part = tuple[float, str]
 """``(usd, basis)`` of one line of the estimate."""
-
-
-def js_number(x: float) -> str:
-    """ECMAScript ``Number.prototype.toString()`` (shortest round-trip digits, JS exponent thresholds)."""
-    if isinstance(x, bool):
-        x = int(x)
-    if x != x:
-        return "NaN"
-    if x in (math.inf, -math.inf):
-        return "Infinity" if x > 0 else "-Infinity"
-    if x == 0:
-        return "0"
-    sign = "-" if x < 0 else ""
-    t = Decimal(repr(abs(float(x)))).normalize().as_tuple()
-    digits = "".join(str(d) for d in t.digits)
-    k = len(digits)
-    n = int(t.exponent) + k
-    if k <= n <= 21:
-        s = digits + "0" * (n - k)
-    elif 0 < n <= 21:
-        s = digits[:n] + "." + digits[n:]
-    elif -6 < n <= 0:
-        s = "0." + "0" * (-n) + digits
-    else:
-        e = n - 1
-        mant = digits if k == 1 else digits[0] + "." + digits[1:]
-        s = f"{mant}e{'+' if e > 0 else '-'}{abs(e)}"
-    return sign + s
 
 
 def _to_precision6(n: float) -> float:
@@ -118,10 +91,8 @@ def _tokens(row: Mapping[str, Any], u: UsageInput, allow_context_tier: bool = Tr
             v = row.get(field)
         return v if _num(v) else None
 
-    in_rate = r("per_1m_input_tokens")
-    in_rate = 0 if in_rate is None else in_rate
-    out_rate = r("per_1m_output_tokens")
-    out_rate = 0 if out_rate is None else out_rate
+    in_rate = _or(r("per_1m_input_tokens"), 0)
+    out_rate = _or(r("per_1m_output_tokens"), 0)
     cache_rate = r("per_1m_cached_input_tokens")
     parts: list[str] = []
     if w5 > 0 or w1 > 0 or (cache_rate is not None and cached > 0):
@@ -134,8 +105,7 @@ def _tokens(row: Mapping[str, Any], u: UsageInput, allow_context_tier: bool = Tr
             (w1, "per_1m_cache_write_1h_input_tokens", "1h-write"),
         ):
             if count > 0:
-                rate = r(field)
-                rate = in_rate if rate is None else rate
+                rate = _or(r(field), in_rate)
                 usd += (count * rate) / M
                 parts.append(f"{js_number(count)} {label} × {money(rate)}/1M")
     else:
@@ -153,8 +123,7 @@ def _images(row: Mapping[str, Any], u: UsageInput) -> Part:
         if t is None:
             raise RelayError(f"estimate_cost: no usable per_image_resolution rate for {row['model']}")
         return count * t[0], f"per_image: {js_number(count)} × {money(t[0])} ({t[1]})"
-    rate = row.get("per_image")
-    rate = 0 if rate is None else rate
+    rate = _or(row.get("per_image"), 0)
     return count * rate, f"per_image: {js_number(count)} × {money(rate)}"
 
 
@@ -177,8 +146,7 @@ def _video_candidates(u: UsageInput) -> list[str | None]:
 
 def _media_rate(v: Any, u: UsageInput) -> float:
     if _num(v):
-        rate: float = v
-        return rate
+        return cast(float, v)
     if isinstance(v, Mapping):
         t = _tier_rate(v, [_sound(u)])
         return 0 if t is None else t[0]
@@ -196,13 +164,11 @@ def _base(row: Mapping[str, Any], u: UsageInput) -> Part:
         return a[0] + b[0], f"{a[1]} + {b[1]}"
     if bt == "per_character":
         n = _or(u.get("character_count"), 0)
-        rate = row.get("per_1k_characters")
-        rate = 0 if rate is None else rate
+        rate = _or(row.get("per_1k_characters"), 0)
         return (n * rate) / 1000, f"per_character: {js_number(n)} chars × {money(rate)}/1K"
     if bt == "per_second_audio":
         s = _or(u.get("duration_seconds"), 0)
-        rate = row.get("per_second_audio")
-        rate = 0 if rate is None else rate
+        rate = _or(row.get("per_second_audio"), 0)
         return s * rate, f"per_second_audio: {js_number(s)} s × {money(rate)}"
     if bt == "per_second_video":
         s = _or(u.get("duration_seconds"), 0)
@@ -254,7 +220,5 @@ def estimate(pricing: PricingResponse, model: str, usage: UsageInput) -> CostEst
     ):
         if fee is not None:
             parts.append(fee)
-    usd: float = 0
-    for p in parts:
-        usd = usd + p[0]
+    usd = sum(p[0] for p in parts)
     return {"usd": _js_round(usd * 1e8) / 1e8, "basis": " + ".join(p[1] for p in parts)}

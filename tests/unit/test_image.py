@@ -14,7 +14,7 @@ import pytest
 
 import relaygpu._async.image as async_image
 import relaygpu._sync.image as sync_image
-from relaygpu import RelayError
+from relaygpu import APIConnectionError, RelayError
 from tests.helpers import IMAGE_QWEN, KEY, Mock, detail, json_reply, maybe
 
 # A 1×1 PNG (synthetic: no base64 route was captured, each costs a billed call).
@@ -73,28 +73,41 @@ class TestRelayImageNormalisation:
 
 
 class TestDownload:
-    async def test_a_url_download_never_carries_the_relay_credential(self, mod: ModuleType, monkeypatch: pytest.MonkeyPatch) -> None:
-        seen: list[httpx.Request] = []
+    """Python addition: a result link is fetched over the client's own transport (its ``http_client``, proxies, mock),
+    never with the Relay credential or the client's default headers."""
 
-        def handler(req: httpx.Request) -> httpx.Response:
-            seen.append(req)
-            return httpx.Response(200, content=b"\x89PNG")
+    @staticmethod
+    async def generated(make: Any, download: httpx.Response | Exception) -> tuple[Mock, Any]:
+        m = Mock(detail("Qwen/qwen-image"), json_reply(200, IMAGE_QWEN["body"]), download)
+        r = await maybe(make(m, default_headers={"X-Team": "t1"}).image.generate("Qwen/qwen-image", {"prompt": "a"}))
+        return m, r.images[0]
 
-        cls = httpx.Client if mod is sync_image else httpx.AsyncClient
-        monkeypatch.setattr(mod, "_download_client", lambda: cls(transport=httpx.MockTransport(handler)))
-        relay = mod.to_relay_image("https://cdn.relaygpu.com/content/x")
-        assert await maybe(relay.to_bytes()) == b"\x89PNG"
-        assert len(seen) == 1
-        assert "x-api-key" not in seen[0].headers and "authorization" not in seen[0].headers
-        assert KEY not in str(seen[0].headers)
+    async def test_a_url_download_rides_the_client_transport_and_never_carries_the_relay_credential(self, make: Any) -> None:
+        m, img = await self.generated(make, httpx.Response(200, content=b"\x89PNG"))
+        assert await maybe(img.to_bytes()) == b"\x89PNG"
+        assert len(m.calls) == 3
+        dl = m.calls[2]
+        assert (dl.method, dl.url) == ("GET", IMAGE_QWEN["body"]["urls"][0])
+        assert "x-api-key" not in dl.headers and "authorization" not in dl.headers and "x-team" not in dl.headers
+        assert KEY not in str(dl.headers)
+        assert dl.headers["user-agent"].startswith("relaygpu-python/")
 
-    async def test_a_non_2xx_download_raises_with_the_ts_message(self, mod: ModuleType, monkeypatch: pytest.MonkeyPatch) -> None:
-        cls = httpx.Client if mod is sync_image else httpx.AsyncClient
-        monkeypatch.setattr(mod, "_download_client", lambda: cls(transport=httpx.MockTransport(lambda r: httpx.Response(403))))
+    async def test_a_non_2xx_download_raises_with_the_ts_message(self, make: Any) -> None:
+        _, img = await self.generated(make, httpx.Response(403))
         with pytest.raises(RelayError) as ei:
-            await maybe(mod.to_relay_image("https://cdn.relaygpu.com/content/x").to_bytes())
+            await maybe(img.to_bytes())
         assert str(ei.value) == "Image download failed: HTTP 403 (result links expire; see store_output)"
         assert ei.value.status == 403
+
+    async def test_a_transport_error_is_the_sdk_connection_error(self, make: Any) -> None:
+        _, img = await self.generated(make, httpx.ConnectError("refused"))
+        with pytest.raises(APIConnectionError, match=r"^Image download failed: ConnectError: refused$"):
+            await maybe(img.to_bytes())
+
+    async def test_save_downloads_then_writes(self, make: Any, tmp_path: Path) -> None:
+        _, img = await self.generated(make, httpx.Response(200, content=b"\x89PNG"))
+        await maybe(img.save(tmp_path / "out.png"))
+        assert (tmp_path / "out.png").read_bytes() == b"\x89PNG"
 
 
 class TestImageGenerate:

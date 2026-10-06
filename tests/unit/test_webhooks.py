@@ -2,12 +2,8 @@
 
 from __future__ import annotations
 
-import base64
 import email
-import hashlib
-import hmac
 import json
-import os
 import pickle
 import time
 from typing import Any
@@ -18,21 +14,11 @@ import pytest
 
 from relaygpu import PermissionDeniedError, RelayError
 from relaygpu.webhooks import WebhookEvent, WebhookVerificationError, verify_webhook
-from tests.helpers import Mock, json_reply, maybe, relay_error
-
-
-def new_secret() -> str:
-    return "whsec_" + base64.b64encode(os.urandom(24)).decode()
-
+from tests.helpers import Mock, json_reply, maybe, new_secret, relay_error, sign
 
 SECRET = new_secret()
 PREVIOUS = new_secret()
 NOW = 1_791_000_000
-
-
-def sign(secret: str, msg_id: str, ts: int, body: str) -> str:
-    key = base64.b64decode(secret[len("whsec_") :])
-    return "v1," + base64.b64encode(hmac.new(key, f"{msg_id}.{ts}.{body}".encode(), hashlib.sha256).digest()).decode()
 
 
 RUN_BODY = json.dumps(

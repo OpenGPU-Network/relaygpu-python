@@ -1,6 +1,6 @@
 """Port of test/unit/tasks.test.ts: tasks.get (keyless, colon literal), tasks.wait (F3: long-poll arithmetic, 0.5 s
 floor, transitions-only progress, TaskFailedError, APITimeoutError). TS's AbortSignal test becomes the asyncio
-cancellation test. The clock is driven: a fake ``monotonic`` advanced by the recorded sleeps and by held polls."""
+cancellation test. The clock is the virtual one of tests/conftest.py, advanced by the recorded sleeps and by held polls."""
 
 from __future__ import annotations
 
@@ -13,11 +13,8 @@ from urllib.parse import parse_qs, urlsplit
 import httpx
 import pytest
 
-import relaygpu._async.tasks as async_tasks
-import relaygpu._sync.tasks as sync_tasks
-from relaygpu import APITimeoutError, TaskFailedError, TaskNotFoundError
-from relaygpu import _run_common as common
-from tests.helpers import VIDEO_KLING, Mock, Recorded, async_relay, json_reply, maybe, relay_error, task
+from relaygpu import APITimeoutError, TaskFailedError, TaskNotFoundError, _clock
+from tests.helpers import VIDEO_KLING, Mock, Recorded, VirtualClock, async_relay, json_reply, maybe, relay_error, task
 
 ID: str = VIDEO_KLING["accepted"]["body"]["task_id"]
 
@@ -26,34 +23,7 @@ def wait_param(url: str) -> int:
     return int(parse_qs(urlsplit(url).query)["wait"][0])
 
 
-class Clock:
-    def __init__(self) -> None:
-        self.now = 1000.0
-
-    def __call__(self) -> float:
-        return self.now
-
-
-@pytest.fixture
-def clock(monkeypatch: pytest.MonkeyPatch, sleeps: list[float]) -> Clock:
-    """A fake clock: every SDK sleep in tasks.wait is recorded (in ``sleeps``) and advances it; nothing really sleeps."""
-    c = Clock()
-    monkeypatch.setattr(common, "monotonic", c)
-
-    def fake_sync(seconds: float) -> None:
-        sleeps.append(seconds)
-        c.now += seconds
-
-    async def fake_async(seconds: float) -> None:
-        sleeps.append(seconds)
-        c.now += seconds
-
-    monkeypatch.setattr(sync_tasks, "sync_sleep", fake_sync)
-    monkeypatch.setattr(async_tasks, "async_sleep", fake_async)
-    return c
-
-
-def held(clock: Clock, reply: httpx.Response, *, seconds: float | None = None) -> Callable[[Recorded], httpx.Response]:
+def held(clock: VirtualClock, reply: httpx.Response, *, seconds: float | None = None) -> Callable[[Recorded], httpx.Response]:
     """A reply the server held for ``seconds`` (default: the full ``?wait=``)."""
 
     def answer(rec: Recorded) -> httpx.Response:
@@ -79,7 +49,7 @@ class TestTasksGet:
 
 class TestTasksWait:
     async def test_long_polls_wait_30_keylessly_and_resolves_the_completed_task_the_captured_kling_run_5_polls(
-        self, make: Any, clock: Clock
+        self, make: Any, clock: VirtualClock
     ) -> None:
         polls = VIDEO_KLING["polls"]
         replies = [
@@ -95,13 +65,13 @@ class TestTasksWait:
         # on_progress only on transitions: running (once), then completed.
         assert seen == [{"status": "running", "elapsed_seconds": 30}, {"status": "completed", "elapsed_seconds": 121}]
 
-    async def test_a_15_s_task_costs_at_most_2_requests_when_the_server_holds_the_poll(self, make: Any, clock: Clock) -> None:
+    async def test_a_15_s_task_costs_at_most_2_requests_when_the_server_holds_the_poll(self, make: Any, clock: VirtualClock) -> None:
         m = Mock(held(clock, task("completed", elapsed_seconds=15, result={"urls": ["u"]}), seconds=15))
         await maybe(make(m).tasks.wait("direct:t1"))
         assert len(m.calls) <= 2
 
     async def test_wait_never_exceeds_the_remaining_budget_ceil_ge_1_and_a_shed_early_answer_just_loops_ge_0_5_s_apart(
-        self, make: Any, clock: Clock, sleeps: list[float]
+        self, make: Any, clock: VirtualClock, sleeps: list[float]
     ) -> None:
         stamps: list[float] = []
 
@@ -120,7 +90,9 @@ class TestTasksWait:
         assert sleeps == [0.5, 0.5, 0.5]
         assert w == [11, 10, 10, 9]
 
-    async def test_w_is_the_ceil_of_the_remaining_budget_after_held_polls(self, make: Any, clock: Clock, sleeps: list[float]) -> None:
+    async def test_w_is_the_ceil_of_the_remaining_budget_after_held_polls(
+        self, make: Any, clock: VirtualClock, sleeps: list[float]
+    ) -> None:
         """Python addition: held polls need no floor sleep, and W shrinks with the budget (never above it, never 0)."""
         m = Mock(
             held(clock, task("running")),
@@ -132,7 +104,7 @@ class TestTasksWait:
         assert [wait_param(c.url) for c in m.calls] == [30, 30, 5, 1]
         assert sleeps == []  # every poll was held ≥ 0.5 s
 
-    async def test_each_poll_gets_an_http_timeout_of_w_plus_15_s(self, make: Any, clock: Clock) -> None:
+    async def test_each_poll_gets_an_http_timeout_of_w_plus_15_s(self, make: Any, clock: VirtualClock) -> None:
         """Python addition: the per-poll HTTP timeout is ``W + 15`` seconds (TS ``w * 1000 + POLL_SLACK_MS``)."""
         m = Mock(task("running"), task("completed", result={}))
         relay = make(m)
@@ -147,7 +119,9 @@ class TestTasksWait:
         await maybe(relay.tasks.wait("direct:t1", timeout=20.0))
         assert seen == [(20, 35.0, True), (20, 35.0, True)]
 
-    async def test_failed_raises_task_failed_error_carrying_error_code_error_error_detail_task_id(self, make: Any, clock: Clock) -> None:
+    async def test_failed_raises_task_failed_error_carrying_error_code_error_error_detail_task_id(
+        self, make: Any, clock: VirtualClock
+    ) -> None:
         failed = {
             "task_id": ID,
             "status": "failed",
@@ -169,13 +143,13 @@ class TestTasksWait:
             "rid-f",
         )
 
-    async def test_a_failed_task_without_error_text_says_task_id_failed(self, make: Any, clock: Clock) -> None:
+    async def test_a_failed_task_without_error_text_says_task_id_failed(self, make: Any, clock: VirtualClock) -> None:
         m = Mock(task("failed", task_id=ID, error=None, error_code=None))
         with pytest.raises(TaskFailedError) as ei:
             await maybe(make(m).tasks.wait(ID))
         assert (str(ei.value), ei.value.code, ei.value.detail) == (f"Task {ID} failed", None, None)
 
-    async def test_budget_exhausted_raises_api_timeout_error(self, make: Any, clock: Clock) -> None:
+    async def test_budget_exhausted_raises_api_timeout_error(self, make: Any, clock: VirtualClock) -> None:
         m = Mock(*(task("running") for _ in range(10)))
         with pytest.raises(APITimeoutError) as ei:
             await maybe(make(m).tasks.wait("direct:t1", timeout=1.2))
@@ -185,7 +159,7 @@ class TestTasksWait:
         assert ei.value.detail["task"]["status"] == "running"
         assert 2 <= len(m.calls) <= 4
 
-    async def test_a_zero_budget_raises_before_any_poll_still_pending(self, make: Any, clock: Clock) -> None:
+    async def test_a_zero_budget_raises_before_any_poll_still_pending(self, make: Any, clock: VirtualClock) -> None:
         m = Mock()
         with pytest.raises(APITimeoutError, match="is still pending after 0 s"):
             await maybe(make(m).tasks.wait("direct:t1", timeout=0))
@@ -201,7 +175,7 @@ class TestCancellation:
             parked.set()
             await asyncio.Event().wait()
 
-        monkeypatch.setattr(async_tasks, "async_sleep", park)
+        monkeypatch.setattr(_clock, "async_sleep", park)
         m = Mock(task("running"), task("running"))
         relay = async_relay(m)
         t = asyncio.ensure_future(relay.tasks.wait("direct:t1"))

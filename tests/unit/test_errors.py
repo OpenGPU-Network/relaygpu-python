@@ -29,6 +29,7 @@ from relaygpu import (
     parse_retry_after,
 )
 from relaygpu._generated.error_codes import ERROR_CODE_CLASSES
+from tests.helpers import load
 
 
 def h(**kw: str) -> httpx.Headers:
@@ -116,7 +117,7 @@ def test_every_catalog_code_has_an_http_status() -> None:
 
 
 def test_error_classes_are_exported_and_match_the_ts_names() -> None:
-    names = json.loads((Path(__file__).parents[1] / "fixtures" / "ts_surface_0.1.0.json").read_text())["errors"]
+    names = load("ts_surface_0.1.0.json")["errors"]
     missing = [n for n in names if not hasattr(relaygpu, n)]
     assert missing == []
 

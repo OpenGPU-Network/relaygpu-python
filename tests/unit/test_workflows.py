@@ -1,4 +1,4 @@
-"""Port of test/unit/workflows.test.ts. Time is virtual: the clock is the sum of the recorded SDK sleeps."""
+"""Port of test/unit/workflows.test.ts. Time is virtual: the clock of tests/conftest.py advances by each recorded SDK sleep."""
 
 from __future__ import annotations
 
@@ -8,13 +8,12 @@ from typing import Any
 
 import pytest
 
-import relaygpu._async.workflows as async_workflows
-import relaygpu._sync.workflows as sync_workflows
 from relaygpu import (
     APITimeoutError,
     TaskFailedError,
     WorkflowRunLimitReachedError,
     WorkflowRunNotCancellableError,
+    _clock,
 )
 from tests.helpers import KEY, Mock, async_relay, json_reply, maybe, relay_error
 
@@ -25,14 +24,6 @@ UUID4 = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 
 def state(status: str, **extra: Any) -> dict[str, Any]:
     return {"run_id": RUN, "workflow_id": "script-voiceover", "version": 2, "status": status, "inputs": {}, "steps": [], **extra}
-
-
-@pytest.fixture(autouse=True)
-def clock(monkeypatch: pytest.MonkeyPatch, sleeps: list[float]) -> list[float]:
-    """``monotonic()`` = total seconds the SDK has (virtually) slept."""
-    for mod in (async_workflows, sync_workflows):
-        monkeypatch.setattr(mod, "monotonic", lambda: float(sum(sleeps)))
-    return sleeps
 
 
 class TestListGet:
@@ -143,7 +134,7 @@ class TestWaitRun:
             started.set()
             await asyncio.Event().wait()
 
-        monkeypatch.setattr(async_workflows, "async_sleep", blocking_sleep)
+        monkeypatch.setattr(_clock, "async_sleep", blocking_sleep)
         m = Mock(json_reply(200, state("running")))
         t = asyncio.ensure_future(async_relay(m).workflows.wait_run(RUN))
         await started.wait()

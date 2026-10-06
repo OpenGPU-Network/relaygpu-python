@@ -1,32 +1,34 @@
 from __future__ import annotations
 
-import sys
-from collections.abc import Callable, Iterator
+from collections.abc import Callable
 from typing import Any
 
 import pytest
 
-from tests.helpers import Mock, async_relay, sync_relay
+from relaygpu import _clock
+from tests.helpers import Mock, VirtualClock, async_relay, sync_relay
 
 
 @pytest.fixture(autouse=True)
-def sleeps(monkeypatch: pytest.MonkeyPatch) -> Iterator[list[float]]:
-    """Every SDK sleep is recorded, never slept (retry backoff, poll floors). Tests assert on the list."""
-    record: list[float] = []
-
-    def fake_sync(seconds: float) -> None:
-        record.append(seconds)
+def clock(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> VirtualClock:
+    """Every SDK sleep is recorded, never slept (retry backoff, poll floors), and advances the virtual clock, which is
+    the SDK's ``monotonic`` in the unit suite. Staging e2e keeps the real clock (a real task takes real time)."""
+    c = VirtualClock()
 
     async def fake_async(seconds: float) -> None:
-        record.append(seconds)
+        c.sleep(seconds)
 
-    for name, mod in list(sys.modules.items()):
-        if name.startswith("relaygpu.") and mod is not None:
-            if hasattr(mod, "sync_sleep"):
-                monkeypatch.setattr(mod, "sync_sleep", fake_sync)
-            if hasattr(mod, "async_sleep"):
-                monkeypatch.setattr(mod, "async_sleep", fake_async)
-    yield record
+    if request.node.get_closest_marker("e2e") is None:
+        monkeypatch.setattr(_clock, "monotonic", c.monotonic)
+    monkeypatch.setattr(_clock, "sync_sleep", c.sleep)
+    monkeypatch.setattr(_clock, "async_sleep", fake_async)
+    return c
+
+
+@pytest.fixture
+def sleeps(clock: VirtualClock) -> list[float]:
+    """The seconds of every SDK sleep so far, in order. Tests assert on the list."""
+    return clock.sleeps
 
 
 @pytest.fixture(params=["sync", "async"])

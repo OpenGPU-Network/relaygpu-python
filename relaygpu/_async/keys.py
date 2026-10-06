@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any, cast
 
+from .._core import _UNSET
 from .._generated.error_codes import KeyNotFoundError
 from .._generated.types import (
     CreateKeyRequest,
@@ -38,14 +39,12 @@ class AsyncKeys:
     def __init__(self, relay: AsyncRelay) -> None:
         self._relay = relay
 
-    async def _call(self, method: str, path: str, body: Any = None) -> Any:
-        if body is None:
-            return (await self._relay._http.request(method, path)).data
+    async def _call(self, method: str, path: str, body: Any = _UNSET) -> Any:
         return (await self._relay._http.request(method, path, json=body)).data
 
     async def list(self, **params: Unpack[KeyListParams]) -> KeyListResponse:
         """``GET /v2/customer/keys``: newest first, secrets masked. Page with ``starting_after`` = ``next_cursor``."""
-        res = await self._relay._http.request("GET", "/v2/customer/keys", query=cast("dict[str, Any]", params))
+        res = await self._relay._http.request("GET", "/v2/customer/keys", query=params)
         return cast(KeyListResponse, res.data)
 
     async def list_all(self, **params: Unpack[KeyListAllParams]) -> AsyncIterator[KeyResponse]:

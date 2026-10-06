@@ -83,8 +83,3 @@ class KeyListAllParams(TypedDict, total=False):
 
 class KeyListParams(KeyListAllParams, total=False):
     starting_after: str | None
-
-
-def query_of(params: Any) -> dict[str, Any]:
-    """Keyword arguments → query, in the caller's order; ``from_`` (a Python keyword) is sent as ``from``."""
-    return {("from" if k == "from_" else k): v for k, v in params.items()}

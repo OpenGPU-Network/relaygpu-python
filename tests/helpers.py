@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import base64
 import contextlib
+import hashlib
+import hmac
 import inspect
 import json
+import os
+import re
 from collections.abc import AsyncIterator, Callable, Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +19,7 @@ import httpx
 
 from relaygpu import AsyncRelay, Relay
 
+ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path(__file__).parent / "fixtures"
 KEY = "relay_sk_unit_secret_never_logged"
 BASE = "http://relay.test"
@@ -72,6 +78,22 @@ class Mock:
         return nxt
 
 
+class VirtualClock:
+    """``relaygpu._clock.monotonic`` while a test runs: starts at 1000.0 and moves only when the SDK (virtually) sleeps or
+    a test advances ``now`` (e.g. a poll the server held)."""
+
+    def __init__(self) -> None:
+        self.now = 1000.0
+        self.sleeps: list[float] = []
+
+    def monotonic(self) -> float:
+        return self.now
+
+    def sleep(self, seconds: float) -> None:
+        self.sleeps.append(seconds)
+        self.now += seconds
+
+
 def sync_relay(mock: Mock, **kw: Any) -> Relay:
     kw.setdefault("api_key", KEY)
     kw.setdefault("base_url", BASE)
@@ -87,6 +109,12 @@ def async_relay(mock: Mock, **kw: Any) -> AsyncRelay:
 async def maybe(value: Any) -> Any:
     """Awaits a coroutine (AsyncRelay), passes a value through (Relay): one test body drives both clients."""
     return await value if inspect.isawaitable(value) else value
+
+
+async def agen(*chunks: bytes) -> AsyncIterator[bytes]:
+    """An async iterator of bytes (a body / file value only ``AsyncRelay`` reads)."""
+    for c in chunks:
+        yield c
 
 
 async def collect(it: Iterable[Any] | AsyncIterator[Any] | Iterator[Any]) -> list[Any]:
@@ -126,3 +154,47 @@ def detail_with(name: str, endpoint: dict[str, Any]) -> httpx.Response:
 
 def task(status: str, **extra: Any) -> httpx.Response:
     return json_reply(200, {"task_id": "direct:t1", "status": status, "elapsed_seconds": 1, **extra})
+
+
+def accepted202(headers: dict[str, str] | None = None) -> httpx.Response:
+    """The captured Kling ``202`` envelope, with ``X-Request-ID: rid-202``."""
+    return json_reply(202, VIDEO_KLING["accepted"]["body"], {"x-request-id": "rid-202", **(headers or {})})
+
+
+# ---- webhook signing (Standard Webhooks) ----
+
+
+def new_secret() -> str:
+    """A fresh ``whsec_<base64>`` signing secret."""
+    return "whsec_" + base64.b64encode(os.urandom(24)).decode()
+
+
+def sign(secret: str, msg_id: str, ts: int | str, body: str) -> str:
+    """One ``v1,<base64 HMAC-SHA256>`` signature of ``{msg_id}.{ts}.{body}``."""
+    key = base64.b64decode(secret[len("whsec_") :])
+    return "v1," + base64.b64encode(hmac.new(key, f"{msg_id}.{ts}.{body}".encode(), hashlib.sha256).digest()).decode()
+
+
+# ---- the repo's gitignored .env (values never printed) ----
+
+
+def dotenv() -> dict[str, str]:
+    """``KEY=value`` lines of the repo's ``.env`` (first occurrence wins); ``{}`` when there is none."""
+    out: dict[str, str] = {}
+    p = ROOT / ".env"
+    if p.exists():
+        for line in p.read_text("utf-8").splitlines():
+            m = re.match(r"^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$", line)
+            if m:
+                out.setdefault(m.group(1), m.group(2).strip().strip('"').strip("'"))
+    return out
+
+
+def load_dotenv() -> None:
+    """Copies ``.env`` into ``os.environ`` without overriding what the environment already sets (the e2e suite)."""
+    for k, v in dotenv().items():
+        os.environ.setdefault(k, v)
+
+
+def env(name: str) -> str | None:
+    return os.environ.get(name) or None

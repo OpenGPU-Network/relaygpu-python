@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
+from .. import _clock
 from .. import _run_common as common
-from .._sleep import sync_sleep
 from ..types import TaskProgress, TaskStatus
 
 if TYPE_CHECKING:
@@ -23,8 +23,7 @@ class Tasks:
     def get(self, id: str) -> TaskStatus:
         """``GET /v2/tasks/{id}``: the current status. An unknown or expired id raises ``TaskNotFoundError``."""
         res = self._relay._http.request("GET", common.task_path(id), no_auth=True)
-        data: TaskStatus = res.data
-        return data
+        return cast(TaskStatus, res.data)
 
     def wait(
         self,
@@ -39,23 +38,23 @@ class Tasks:
         ``timeout`` (seconds, default 20 min) runs out; the task keeps running server-side. ``on_progress`` fires on
         status transitions only (``queued`` → ``running`` → …); there is no finer-grained progress.
         """
-        deadline = common.monotonic() + timeout
+        deadline = _clock.monotonic() + timeout
         path = common.task_path(id)
         last: str | None = None
         last_call: float | None = None
         task: TaskStatus | None = None
         while True:
             if last_call is not None:
-                gap = common.POLL_FLOOR - (common.monotonic() - last_call)
+                gap = common.POLL_FLOOR - (_clock.monotonic() - last_call)
                 if gap > 0:
-                    sync_sleep(gap)
-            remaining = deadline - common.monotonic()
+                    _clock.sync_sleep(gap)
+            remaining = deadline - _clock.monotonic()
             if remaining <= 0:
                 raise common.wait_timeout_error(id, timeout, task)
             w = common.poll_wait(remaining)
-            last_call = common.monotonic()
+            last_call = _clock.monotonic()
             res = self._relay._http.request("GET", path, query={"wait": w}, no_auth=True, timeout=w + common.POLL_SLACK)
-            current: TaskStatus = res.data
+            current = cast(TaskStatus, res.data)
             task = current
             status = current["status"]
             if status != last:

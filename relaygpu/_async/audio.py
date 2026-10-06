@@ -19,6 +19,10 @@ class AsyncAudio:
     def __init__(self, relay: AsyncRelay) -> None:
         self._relay = relay
 
+    async def _run(self, model: str, input: Mapping[str, Any], **options: Any) -> dict[str, Any]:
+        """The one body of ``speech`` and ``transcribe``: ``run(..., wait=True)``, so never the 202 envelope."""
+        return cast("dict[str, Any]", await run(self._relay, model, input, wait=True, **options))
+
     async def speech(
         self,
         model: KnownSpeechModel | str,
@@ -36,11 +40,9 @@ class AsyncAudio:
     ) -> dict[str, Any]:
         """Text-to-speech. Returns the response body: ``audio_url`` (a link that expires) or ``audio_base64`` +
         ``content_type``, per model."""
-        out = await run(
-            self._relay,
+        return await self._run(
             model,
             input,
-            wait=True,
             on_progress=on_progress,
             timeout=timeout,
             mode=mode,
@@ -51,7 +53,6 @@ class AsyncAudio:
             upload=upload,
             inline_images=inline_images,
         )
-        return cast("dict[str, Any]", out)
 
     async def transcribe(
         self,
@@ -70,11 +71,9 @@ class AsyncAudio:
     ) -> dict[str, Any]:
         """Speech-to-text. ``audio_url`` may be a link or bytes / a path / a file-like object (uploaded first). Returns
         ``{text, language?, duration?}``."""
-        out = await run(
-            self._relay,
+        return await self._run(
             model,
             input,
-            wait=True,
             on_progress=on_progress,
             timeout=timeout,
             mode=mode,
@@ -85,4 +84,3 @@ class AsyncAudio:
             upload=upload,
             inline_images=inline_images,
         )
-        return cast("dict[str, Any]", out)

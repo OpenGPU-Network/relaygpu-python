@@ -9,27 +9,26 @@ from typing import Any
 import pytest
 
 from relaygpu import RelayError, TaskFailedError
-from tests.helpers import VIDEO_KLING, Mock, detail, detail_with, json_reply, maybe, task
-
-
-def accepted() -> Any:
-    return json_reply(202, VIDEO_KLING["accepted"]["body"], {"x-request-id": "rid"})
+from tests.helpers import VIDEO_KLING, Mock, accepted202, detail, detail_with, json_reply, maybe, task
 
 
 class TestVideoGenerate:
     async def test_returns_the_202_envelope_by_default_route_path_from_models_get_no_model_in_body(self, make: Any) -> None:
-        m = Mock(detail("KlingTeam/v3-T2V"), accepted())
+        m = Mock(detail("KlingTeam/v3-T2V"), accepted202())
         r = await maybe(
             make(m).video.generate("KlingTeam/v3-T2V", {"prompt": "ball", "duration": 5, "quality_mode": "std", "sound": False})
         )
-        assert r == {**VIDEO_KLING["accepted"]["body"], "replayed": False, "request_id": "rid"}
+        assert r == {**VIDEO_KLING["accepted"]["body"], "replayed": False, "request_id": "rid-202"}
         assert (m.calls[1].method, m.calls[1].url) == ("POST", "http://relay.test/v2/video/kling-3/t2v")
         assert m.calls[1].body == {"prompt": "ball", "duration": 5, "quality_mode": "std", "sound": False, "async": True}
         assert len(m.calls) == 2
 
     async def test_wait_true_long_polls_and_returns_the_completed_task_status_on_progress_on_transitions(self, make: Any) -> None:
         m = Mock(
-            detail("KlingTeam/v3-T2V"), accepted(), task("running", elapsed_seconds=30), json_reply(200, VIDEO_KLING["completed"]["body"])
+            detail("KlingTeam/v3-T2V"),
+            accepted202(),
+            task("running", elapsed_seconds=30),
+            json_reply(200, VIDEO_KLING["completed"]["body"]),
         )
         seen: list[str] = []
         t = await maybe(
@@ -43,7 +42,7 @@ class TestVideoGenerate:
     async def test_wait_true_on_a_failed_task_throws_task_failed_error(self, make: Any) -> None:
         m = Mock(
             detail("KlingTeam/v3-T2V"),
-            accepted(),
+            accepted202(),
             task("failed", error="upstream timed out", error_code="UPSTREAM_TIMEOUT", error_detail=None),
         )
         with pytest.raises(TaskFailedError) as ei:
@@ -51,7 +50,7 @@ class TestVideoGenerate:
         assert ei.value.code == "UPSTREAM_TIMEOUT"
 
     async def test_motion_control_resolves_its_own_route_video_url_is_the_reference_field(self, make: Any) -> None:
-        m = Mock(detail("KlingTeam/v3-Motion-Control"), accepted())
+        m = Mock(detail("KlingTeam/v3-Motion-Control"), accepted202())
         await maybe(
             make(m).video.generate(
                 "KlingTeam/v3-Motion-Control",

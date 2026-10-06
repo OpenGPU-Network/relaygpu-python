@@ -10,17 +10,26 @@ import pytest
 
 from relaygpu import ModelNotFoundError, ModelRetiredError, ProviderError, RelayError
 from relaygpu._run_common import is_accepted
-from tests.helpers import IMAGE_QWEN, TTS_QWEN, VIDEO_KLING, Mock, Recorded, detail, detail_with, json_reply, maybe, relay_error, task
+from tests.helpers import (
+    IMAGE_QWEN,
+    TTS_QWEN,
+    VIDEO_KLING,
+    Mock,
+    Recorded,
+    accepted202,
+    detail,
+    detail_with,
+    json_reply,
+    maybe,
+    relay_error,
+    task,
+)
 
 UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 
 
 def posts(calls: list[Recorded]) -> list[Recorded]:
     return [c for c in calls if c.method == "POST"]
-
-
-def accepted202(headers: dict[str, str] | None = None) -> Any:
-    return json_reply(202, VIDEO_KLING["accepted"]["body"], {"x-request-id": "rid-202", **(headers or {})})
 
 
 class TestRunResolution:

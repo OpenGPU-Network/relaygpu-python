@@ -8,8 +8,9 @@ import base64
 import os
 from collections.abc import Iterator, Mapping
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
+from .._core import ReplayableBody
 from .._util import path_id
 from ..inputs import (
     CHUNK_SIZE,
@@ -68,11 +69,8 @@ def _chunks(data: Any) -> Iterator[bytes]:
             yield as_chunk(c)
 
 
-class _PathBody:
-    """A path's bytes as a request body that re-opens the file on each iteration, so the transport could resend it.
-    (``replayable`` is read by the core only if it learns to; today any non-bytes body is sent once.)"""
-
-    replayable = True
+class _PathBody(ReplayableBody):
+    """A path's bytes as a request body that re-opens the file on each iteration, so the transport may resend it."""
 
     def __init__(self, path: os.PathLike[str]) -> None:
         self._path = path
@@ -102,19 +100,23 @@ def _peek(src: Iterator[bytes], n: int) -> tuple[bytes, Iterator[bytes]]:
     return b"".join(chunks)[:n], replay()
 
 
-def _head_of_path(p: os.PathLike[str]) -> bytes:
-    with open(p, "rb") as f:
-        return f.read(HEAD)
+def _media_type_of(data: Any) -> str | None:
+    """The type sniffed from the first bytes of bytes or a path (never a stream: it can be read once)."""
+    if is_bytes_like(data):
+        return sniff_media_type(bytes(data[:HEAD]))
+    if isinstance(data, os.PathLike):
+        with open(data, "rb") as f:
+            return sniff_media_type(f.read(HEAD))
+    return None
 
 
 def _resolve(data: Any, explicit: str | None) -> tuple[RawBody, str | None]:
     """The request body and media type (``explicit`` → sniffed magic bytes) without consuming the data: a path is
     re-opened to stream, a file object or an iterator is peeked and handed back whole."""
     if is_bytes_like(data):
-        body = bytes(data)
-        return body, explicit or sniff_media_type(body[:HEAD])
+        return bytes(data), explicit or _media_type_of(data)
     if isinstance(data, os.PathLike):
-        return _PathBody(data), explicit or sniff_media_type(_head_of_path(data))
+        return _PathBody(data), explicit or _media_type_of(data)
     stream = _chunks(data)
     if explicit:
         return stream, explicit
@@ -122,10 +124,18 @@ def _resolve(data: Any, explicit: str | None) -> tuple[RawBody, str | None]:
     return replay, sniff_media_type(head)
 
 
-def _bytes_of(data: Any) -> bytes:
-    if is_bytes_like(data):
-        return bytes(data)
-    return b"".join([c for c in _chunks(data)])
+def _inline(data: Any, data_uri: bool, key: str) -> str:
+    """The file as raw base64, or as a data URI typed from its first bytes. Reads the data once."""
+    if data_uri and is_stream(data):
+        raise unknown_type_error(f'field "{key}"')  # a stream is never sniffed: it can be read once
+    buf = bytes(data) if is_bytes_like(data) else b"".join([c for c in _chunks(data)])
+    b64 = base64.b64encode(buf).decode("ascii")
+    if not data_uri:
+        return b64
+    media_type = sniff_media_type(buf[:HEAD])
+    if not media_type:
+        raise unknown_type_error(f'field "{key}"')
+    return f"data:{media_type};base64,{b64}"
 
 
 class Files:
@@ -169,8 +179,7 @@ class Files:
             query={"retention": retention, "filename": filename if filename is not None else file_name_of(data)},
             idempotency_key=idempotency_key,
         )
-        out: FileObject = res.data
-        return out
+        return cast(FileObject, res.data)
 
     def copy(
         self,
@@ -187,13 +196,12 @@ class Files:
         if filename is not None:
             body["filename"] = filename
         res = self._relay._http.request("POST", "/v2/files", json=body, idempotency_key=idempotency_key)
-        out: FileObject = res.data
-        return out
+        return cast(FileObject, res.data)
 
     def get(self, file_id: str) -> FileObject:
         """One file. Unknown, foreign or long-expired ids raise ``FileNotFoundError`` (``relaygpu.errors``)."""
-        out: FileObject = (self._relay._http.request("GET", _path(file_id))).data
-        return out
+        res = self._relay._http.request("GET", _path(file_id))
+        return cast(FileObject, res.data)
 
     def list(
         self,
@@ -206,8 +214,8 @@ class Files:
         """One page, newest first: uploads and hosted results. Follow ``next_cursor`` (``None`` on the last page).
         ``limit`` is 1–200, default 50."""
         query = {"source": source, "status": status, "limit": limit, "cursor": cursor}
-        out: FileListResponse = (self._relay._http.request("GET", "/v2/files", query=query)).data
-        return out
+        res = self._relay._http.request("GET", "/v2/files", query=query)
+        return cast(FileListResponse, res.data)
 
     def list_all(
         self,
@@ -254,53 +262,33 @@ class Files:
         """
         if not contains_file(input):
             return dict(input)
-        root = request_schema
-        found = collect_files(input, root)  # refuses a misplaced file before the first upload
+        found = collect_files(input, request_schema)  # refuses a misplaced file before the first upload
         for data, _f, _r in found:
             _refuse_foreign_stream(data)
         chosen = (upload or {}).get("retention")
         retention = chosen if chosen is not None else "relay1h"
-        done: dict[tuple[int, str], str] = {}
+        done: dict[tuple[int, str], str] = {}  # one upload / encoding per distinct object and form
         keep: list[object] = []  # holds each object so its id() is not reused during the call
-
-        def cached(data: object, form: str, make: Any) -> str:
-            key = (id(data), form)
-            if key not in done:
-                keep.append(data)
-                done[key] = make()
-            return done[key]
-
-        def do_upload(data: Any) -> str:
-            def go() -> str:
-                return (self.upload(data, retention=retention, filename=file_name_of(data)))["url"]
-
-            return cached(data, "upload", go)
-
-        def do_inline(data: Any, media_type: str, data_uri: bool) -> str:
-            def go() -> str:
-                b64 = base64.b64encode(_bytes_of(data)).decode("ascii")
-                return f"data:{media_type};base64,{b64}" if data_uri else b64
-
-            return cached(data, "uri" if data_uri else "raw", go)
-
         out: list[str] = []
         for data, f, rule in found:
             if not rule.base64:
-                out.append(do_upload(data))
-                continue
-            if not rule.url:
-                # base64-only: inlining is the only way in, whatever the size (a stream is read into memory).
-                media_type = None if is_stream(data) else (_resolve(data, None))[1]
-                if rule.data_uri and not media_type:
-                    raise unknown_type_error(f'field "{f.key}"')
-                out.append(do_inline(data, media_type or "application/octet-stream", rule.data_uri))
-                continue
-            size = size_of(data)  # None for a stream: never inlined
-            if inline_images and size is not None and size <= INLINE_IMAGE_MAX_BYTES:
-                media_type = (_resolve(data, None))[1]
-                if media_type and media_type.startswith("image/"):
-                    out.append(do_inline(data, media_type, rule.data_uri))
-                    continue
-            out.append(do_upload(data))
-        result: dict[str, Any] = substitute(input, iter(out))
-        return result
+                inline = False
+            elif not rule.url:
+                inline = True  # base64-only: inlining is the only way in, whatever the size (a stream is read into memory)
+            else:
+                size = size_of(data)  # None for a stream: never inlined
+                inline = (
+                    inline_images
+                    and size is not None
+                    and size <= INLINE_IMAGE_MAX_BYTES
+                    and (_media_type_of(data) or "").startswith("image/")
+                )
+            key = (id(data), ("uri" if rule.data_uri else "raw") if inline else "upload")
+            if key not in done:
+                keep.append(data)
+                if inline:
+                    done[key] = _inline(data, rule.data_uri, f.key)
+                else:
+                    done[key] = (self.upload(data, retention=retention, filename=file_name_of(data)))["url"]
+            out.append(done[key])
+        return cast("dict[str, Any]", substitute(input, iter(out)))

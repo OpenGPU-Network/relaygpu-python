@@ -4,18 +4,22 @@ retry policy (F7) and response parsing. ``_async/_http.py`` (and its generated s
 from __future__ import annotations
 
 import json as _json
+import keyword
 import random
-from collections.abc import AsyncIterable, Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from collections.abc import AsyncIterable, Iterable, Iterator, Mapping, Sequence
+from contextlib import contextmanager
+from dataclasses import dataclass
 from typing import Any, Generic, TypedDict, TypeVar, Union
 
 import httpx
 
+from ._exceptions import APIConnectionError, APITimeoutError
 from ._version import VERSION
 
 DEFAULT_BASE_URL = "https://relaygpu.com"
 DEFAULT_TIMEOUT = 600.0
 """Seconds, per HTTP attempt (10 min)."""
+USER_AGENT = f"relaygpu-python/{VERSION}"
 
 T = TypeVar("T")
 
@@ -81,7 +85,7 @@ def build_headers(
     no_auth: bool,
     idempotency_key: str | None,
 ) -> dict[str, str]:
-    headers: dict[str, str] = {"Accept": "application/json", "User-Agent": f"relaygpu-python/{VERSION}"}
+    headers: dict[str, str] = {"Accept": "application/json", "User-Agent": USER_AGENT}
     headers.update(default_headers)
     if not no_auth:
         headers.update(auth)
@@ -91,10 +95,12 @@ def build_headers(
     return headers
 
 
-def query_params(query: Query | None) -> list[tuple[str, str]]:
-    """``None`` drops the key, a list repeats it, a bool is ``true``/``false`` (as JS ``String()`` writes it)."""
+def query_params(query: Mapping[str, Any] | None) -> list[tuple[str, str]]:
+    """``None`` drops the key, a list repeats it, a bool is ``true``/``false`` (as JS ``String()`` writes it). A key
+    spelled as a Python keyword plus one ``_`` (``from_``, the keyword-argument spelling) is sent as the keyword."""
     out: list[tuple[str, str]] = []
-    for k, v in (query or {}).items():
+    for key, v in (query or {}).items():
+        k = key[:-1] if key.endswith("_") and keyword.iskeyword(key[:-1]) else key
         if v is None:
             continue
         if isinstance(v, (list, tuple)):
@@ -111,10 +117,27 @@ def encode_json(body: Any) -> bytes:
     return _json.dumps(body, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
 
 
+class ReplayableBody:
+    """Marks an iterable body that re-opens its source on each iteration (a ``Path`` upload), like a TS Blob: the
+    transport may resend it."""
+
+
 def is_replayable(content: RawBody | None) -> bool:
-    """An iterator body can be sent once; it is never retried. A body that re-opens its source on each iteration (a
-    ``Path`` upload) says so with ``replayable = True``, like a TS Blob."""
-    return content is None or isinstance(content, (bytes, bytearray, memoryview)) or getattr(content, "replayable", False) is True
+    """An iterator body can be sent once; it is never retried. Bytes and a ``ReplayableBody`` can be resent."""
+    return content is None or isinstance(content, (bytes, bytearray, memoryview, ReplayableBody))
+
+
+@contextmanager
+def transport_errors(timed_out: str, failed: str) -> Iterator[None]:
+    """Maps httpx's transport failures to the SDK's: a timeout → ``APITimeoutError(timed_out)``, any other transport
+    error → ``APIConnectionError("{failed}: {type}: {error}")``. ``from None``: the httpx exception holds the request,
+    and the request may hold the credential."""
+    try:
+        yield
+    except httpx.TimeoutException:
+        raise APITimeoutError(timed_out) from None
+    except httpx.TransportError as e:
+        raise APIConnectionError(f"{failed}: {type(e).__name__}: {e}") from None
 
 
 def read_error_body(res: httpx.Response) -> Any:
@@ -157,7 +180,7 @@ class RetryState:
     replayable: bool
     rate_limit_retries: int = 0
     retries: int = 0
-    in_progress_retried: bool = field(default=False)
+    in_progress_retried: bool = False
 
     def after_transport_error(self) -> float | None:
         p = self.policy

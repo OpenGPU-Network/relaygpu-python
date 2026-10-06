@@ -6,21 +6,14 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, Any
 
-from .._run_common import (
-    DEFAULT_WAIT_TIMEOUT,
-    SubmitResult,
-    accepted_envelope,
-    build_body,
-    is_accepted,
-    resolve_endpoint,
-)
+from .._run_common import SubmitResult, accepted_envelope, build_body, resolve_endpoint
 from .._util import random_uuid
 from ..types import AsyncAccepted, Mode, TaskProgress, UploadOptions
 
 if TYPE_CHECKING:
     from .client import AsyncRelay
 
-__all__ = ["is_accepted", "resolve_endpoint", "run", "submit"]
+__all__ = ["run", "submit"]
 
 
 async def submit(
@@ -43,15 +36,16 @@ async def submit(
     endpoint = resolve_endpoint(model, detail)
     body, is_async = build_body(model, input, endpoint, mode=mode, store_output=store_output, webhook_url=webhook_url, async_=async_)
     body = await relay.files.prepare_inputs(body, upload=upload, inline_images=inline_images, request_schema=detail.get("request_schema"))
-    method = endpoint.get("method") or "POST"
-    if is_async:
-        key = idempotency_key if idempotency_key is not None else random_uuid()
-        res = await relay._http.request(method, endpoint["path"], json=body, idempotency_key=key)
-    else:
-        res = await relay._http.request(method, endpoint["path"], json=body, timeout=timeout)
-    if res.status == 202:
-        return SubmitResult(data=res.data, accepted=accepted_envelope(res.data, res.replayed, res.request_id), request_id=res.request_id)
-    return SubmitResult(data=res.data, accepted=None, request_id=res.request_id)
+    key = (idempotency_key if idempotency_key is not None else random_uuid()) if is_async else None
+    res = await relay._http.request(
+        endpoint.get("method") or "POST",
+        endpoint["path"],
+        json=body,
+        idempotency_key=key,
+        timeout=None if is_async else timeout,
+    )
+    accepted = accepted_envelope(res.data, res.replayed, res.request_id) if res.status == 202 else None
+    return SubmitResult(data=res.data, accepted=accepted, request_id=res.request_id)
 
 
 async def run(
@@ -96,8 +90,10 @@ async def run(
         return res.data
     if not wait:
         return res.accepted
-    task = await relay.tasks.wait(
-        res.accepted["task_id"], timeout=timeout if timeout is not None else DEFAULT_WAIT_TIMEOUT, on_progress=on_progress
-    )
+    task_id = res.accepted["task_id"]
+    if timeout is None:  # tasks.wait owns the default budget
+        task = await relay.tasks.wait(task_id, on_progress=on_progress)
+    else:
+        task = await relay.tasks.wait(task_id, timeout=timeout, on_progress=on_progress)
     result = task.get("result")
     return result if result is not None else {}

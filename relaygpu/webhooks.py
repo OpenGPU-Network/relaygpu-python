@@ -6,8 +6,6 @@ TS version is async only because WebCrypto is).
 
 from __future__ import annotations
 
-import base64
-import binascii
 import hashlib
 import hmac
 import json
@@ -24,6 +22,7 @@ from ._generated.types import (
     WebhookSecretResponse,
     WorkflowRunWebhookPayload,
 )
+from ._util import forgiving_b64decode, js_number
 
 if TYPE_CHECKING:
     from typing_extensions import Required
@@ -87,17 +86,10 @@ class InstanceWebhookEvent(TypedDict, total=False):
 WebhookEvent = Union[TaskWebhookEvent, WorkflowWebhookEvent, InstanceWebhookEvent]
 """A verified delivery, discriminated on ``event``."""
 
-WebhookEventName = Literal[
-    "task.completed",
-    "task.failed",
-    "workflow.completed",
-    "workflow.failed",
-    "instance.ready",
-    "instance.failed",
-    "instance.terminated",
-    "instance.warning",
-    "instance.grace",
-]
+_DeliveryEventName = Literal["task.completed", "task.failed", "workflow.completed", "workflow.failed"]
+"""The task and workflow events (the ones ``webhooks.deliveries`` lists)."""
+
+WebhookEventName = Literal[_DeliveryEventName, InstanceEventName]
 
 
 class _HeaderGetter(Protocol):
@@ -114,7 +106,7 @@ WebhookSecret: TypeAlias = WebhookSecretResponse
 class WebhookDeliveryListParams(TypedDict, total=False):
     """Query of ``GET /v2/customer/webhook-deliveries``."""
 
-    event: Literal["task.completed", "task.failed", "workflow.completed", "workflow.failed"] | None
+    event: _DeliveryEventName | None
     limit: int
     outcome: Literal["delivered", "failed", "gave_up", "blocked"] | None
     page: str | None
@@ -135,8 +127,6 @@ class WebhookVerificationError(RelayError):
 # ---------------------------------------------------------------------------------------------
 
 _INT = re.compile(r"[0-9]+")
-_B64 = re.compile(r"[A-Za-z0-9+/]*")
-_ASCII_WS = re.compile(r"[\t\n\f\r ]")
 
 
 def _header(headers: WebhookHeaders, name: str) -> str | None:
@@ -149,23 +139,6 @@ def _header(headers: WebhookHeaders, name: str) -> str | None:
         return None
     v = headers.get(name)
     return None if v is None else str(v)
-
-
-def _b64decode(value: str) -> bytes | None:
-    """``atob`` semantics (WHATWG forgiving-base64): whitespace dropped, padding optional; ``None`` when not base64."""
-    s = _ASCII_WS.sub("", value)
-    if len(s) % 4 == 0 and s.endswith("="):
-        s = s[:-2] if s.endswith("==") else s[:-1]
-    if len(s) % 4 == 1 or not _B64.fullmatch(s):
-        return None
-    try:
-        return base64.b64decode(s + "=" * (-len(s) % 4), validate=True)
-    except (binascii.Error, ValueError):
-        return None
-
-
-def _js_number(n: float) -> str:
-    return str(int(n)) if float(n).is_integer() else str(n)
 
 
 def _no_constant(name: str) -> Any:
@@ -202,7 +175,7 @@ def verify_webhook(
     current = now if now is not None else int(time.time())
     if abs(current - int(ts.strip())) > tolerance:
         raise WebhookVerificationError(
-            "WEBHOOK_TIMESTAMP_OUT_OF_RANGE", f"webhook-timestamp is outside the {_js_number(tolerance)} s tolerance"
+            "WEBHOOK_TIMESTAMP_OUT_OF_RANGE", f"webhook-timestamp is outside the {js_number(tolerance)} s tolerance"
         )
 
     secrets = [secret] if isinstance(secret, str) else list(secret)
@@ -211,7 +184,7 @@ def verify_webhook(
         raise WebhookVerificationError("WEBHOOK_INVALID_SECRET", "No signing secret given")
     keys: list[bytes] = []
     for s in secrets:
-        k = _b64decode(s[6:] if s.startswith("whsec_") else s)
+        k = forgiving_b64decode(s[6:] if s.startswith("whsec_") else s)
         if not k:
             raise WebhookVerificationError("WEBHOOK_INVALID_SECRET", "Signing secret is not a whsec_<base64> value")
         keys.append(k)
@@ -219,7 +192,7 @@ def verify_webhook(
     body = raw_body.encode("utf-8") if isinstance(raw_body, str) else bytes(raw_body)
     signed = f"{msg_id}.{ts}.".encode() + body
 
-    given = [g for g in (_b64decode(t[3:]) for t in sig.split() if t.startswith("v1,")) if g is not None]
+    given = [g for g in (forgiving_b64decode(t[3:]) for t in sig.split() if t.startswith("v1,")) if g is not None]
 
     ok = False
     for k in keys:

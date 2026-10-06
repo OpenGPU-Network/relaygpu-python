@@ -11,16 +11,12 @@ import httpx
 import pytest
 
 from relaygpu import AsyncRelay, KeyNotFoundError, Relay
-from tests.e2e.conftest import API_KEY, BASE_URL, env
+from tests.e2e.conftest import API_KEY, BASE_URL
+from tests.helpers import env
 
 EMAIL = env("RELAY_TEST_EMAIL")
 PASSWORD = env("RELAY_TEST_PASSWORD")
 CUSTOMER_ID = env("RELAY_CUSTOMER_ID")
-
-
-@pytest.fixture
-def relay() -> Relay:
-    return Relay(api_key=API_KEY, base_url=BASE_URL)
 
 
 def test_credits_profile_usage_pricing_allowlist_read_with_the_superkey(relay: Relay) -> None:

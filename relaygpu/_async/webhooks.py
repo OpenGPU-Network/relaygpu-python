@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from .._util import path_id
 from ..webhooks import (
@@ -28,7 +28,7 @@ class AsyncWebhookDeliveries:
 
     async def list(self, **params: Unpack[WebhookDeliveryListParams]) -> WebhookDeliveryPage:
         """``GET /v2/customer/webhook-deliveries``, newest first; pass ``next_page`` back as ``page``. JWT or superkey."""
-        res = await self._relay._http.request("GET", "/v2/customer/webhook-deliveries", query=cast("dict[str, Any]", params))
+        res = await self._relay._http.request("GET", "/v2/customer/webhook-deliveries", query=params)
         return cast(WebhookDeliveryPage, res.data)
 
     async def get(self, task_id_or_run_id: str) -> WebhookDeliveryDetail:

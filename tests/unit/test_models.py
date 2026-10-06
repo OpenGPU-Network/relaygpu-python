@@ -8,8 +8,7 @@ from typing import Any
 import pytest
 
 from relaygpu import ModelNotFoundError
-from relaygpu import _run_common as common
-from tests.helpers import DETAILS, MODELS, PRICING, Mock, detail, json_reply, maybe
+from tests.helpers import DETAILS, MODELS, PRICING, Mock, VirtualClock, detail, json_reply, maybe
 
 
 class TestModelsGet:
@@ -44,17 +43,15 @@ class TestModelsGet:
             await maybe(relay.models.get("nope/nope"))
         assert len(m.calls) == 2
 
-    async def test_the_cache_expires_after_five_minutes(self, make: Any, monkeypatch: pytest.MonkeyPatch) -> None:
+    async def test_the_cache_expires_after_five_minutes(self, make: Any, clock: VirtualClock) -> None:
         """Python addition: the 5-minute TTL is per client and per name."""
-        now = [1000.0]
-        monkeypatch.setattr(common, "monotonic", lambda: now[0])
         m = Mock(detail("KlingTeam/v3-T2V"), detail("KlingTeam/v3-T2V"), detail("Qwen/qwen-image"))
         relay = make(m)
         await maybe(relay.models.get("KlingTeam/v3-T2V"))
-        now[0] += 299.0
+        clock.now += 299.0
         await maybe(relay.models.get("KlingTeam/v3-T2V"))
         assert len(m.calls) == 1
-        now[0] += 1.0
+        clock.now += 1.0
         await maybe(relay.models.get("KlingTeam/v3-T2V"))
         assert len(m.calls) == 2
         await maybe(relay.models.get("Qwen/qwen-image"))

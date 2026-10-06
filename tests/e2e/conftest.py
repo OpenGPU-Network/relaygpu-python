@@ -7,36 +7,23 @@ must then be a venv where the built wheel is installed and ``relaygpu`` resolves
 
 from __future__ import annotations
 
-import os
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
 import pytest
 
-ROOT = Path(__file__).resolve().parents[2]
+from tests.helpers import env, load_dotenv
+
+if TYPE_CHECKING:
+    from relaygpu import Relay
+
 PROD = re.compile(r"relaygpu\.com|relay\.opengpu\.network|:1301\b")
 
-
-def _load_dotenv() -> None:
-    p = ROOT / ".env"
-    if not p.exists():
-        return
-    for line in p.read_text("utf-8").splitlines():
-        m = re.match(r"^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$", line)
-        if m and m.group(1) not in os.environ:
-            os.environ[m.group(1)] = m.group(2).strip().strip('"').strip("'")
-
-
-_load_dotenv()
-
-
-def env(name: str) -> str | None:
-    return os.environ.get(name) or None
-
+load_dotenv()
 
 BASE_URL = env("RELAY_BASE_URL")
 API_KEY = env("RELAY_API_KEY")
@@ -91,6 +78,14 @@ class Counted:
 
     def posts(self) -> list[Call]:
         return [c for c in self.calls if c.method == "POST"]
+
+
+@pytest.fixture
+def relay() -> Relay:
+    """A plain sync client over staging with the test account's key."""
+    from relaygpu import Relay
+
+    return Relay(api_key=API_KEY, base_url=BASE_URL)
 
 
 @pytest.fixture

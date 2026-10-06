@@ -4,8 +4,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
+from .. import _clock
 from .. import _run_common as common
 from .._util import model_path
 from ..types import HealthResponse, ModelCatalog, ModelDetail, ModelRow, PricingResponse, TiersResponse
@@ -25,12 +26,11 @@ class Models:
         """``GET /v2/models`` flattened: every model listed under ``auto``, once, optionally filtered by ``tag``
         (e.g. ``text-to-video``)."""
         res = self._relay._http.request("GET", "/v2/models", no_auth=True)
-        data: ModelCatalog = res.data
+        data = cast(ModelCatalog, res.data)
         seen: dict[str, ModelRow] = {}
         for rows in (data.get("auto") or {}).values():
             for row in rows or []:
-                if row["name"] not in seen:
-                    seen[row["name"]] = row
+                seen.setdefault(row["name"], row)
         rows_all = list(seen.values())
         return [r for r in rows_all if r.get("tag") == tag] if tag else rows_all
 
@@ -38,12 +38,12 @@ class Models:
         """``GET /v2/models/{name}``: route, request/response schema, example, pricing, status. Cached per client for
         5 minutes. An unknown name raises ``ModelNotFoundError`` (never cached); a retired model resolves with
         ``status: "retired"``."""
-        now = common.monotonic()
+        now = _clock.monotonic()
         hit = self._cache.get(name)
         if hit is not None and hit[0] > now:
             return hit[1]
         res = self._relay._http.request("GET", model_path(name), no_auth=True)
-        detail: ModelDetail = res.data
+        detail = cast(ModelDetail, res.data)
         self._cache[name] = (now + common.MODEL_CACHE_SECONDS, detail)
         return detail
 
@@ -56,8 +56,7 @@ class Pricing:
 
     def get(self) -> PricingResponse:
         res = self._relay._http.request("GET", "/v2/pricing", no_auth=True)
-        data: PricingResponse = res.data
-        return data
+        return cast(PricingResponse, res.data)
 
 
 class Tiers:
@@ -68,12 +67,10 @@ class Tiers:
 
     def list(self) -> TiersResponse:
         res = self._relay._http.request("GET", "/v2/tiers", no_auth=True)
-        data: TiersResponse = res.data
-        return data
+        return cast(TiersResponse, res.data)
 
 
 def health(relay: Relay) -> HealthResponse:
     """``GET /v2/health``: ``{status, version, commit}``."""
     res = relay._http.request("GET", "/v2/health", no_auth=True)
-    data: HealthResponse = res.data
-    return data
+    return cast(HealthResponse, res.data)

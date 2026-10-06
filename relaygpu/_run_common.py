@@ -5,7 +5,6 @@ generated sync twins) only do I/O."""
 from __future__ import annotations
 
 import math
-import time
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, TypeGuard
@@ -26,11 +25,6 @@ POLL_FLOOR = 0.5
 """Seconds between two polls at least, so a shed (early) answer never turns into a hot loop."""
 POLL_SLACK = 15.0
 """Slack over ``wait`` for the HTTP timeout of one long-poll."""
-
-
-def monotonic() -> float:
-    """The clock of waits and caches (one seam, so tests can drive it)."""
-    return time.monotonic()
 
 
 def is_accepted(v: Mapping[str, Any]) -> TypeGuard[AsyncAccepted]:

@@ -6,25 +6,18 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
-import httpx
-
-from .._core import DEFAULT_TIMEOUT
-from .._exceptions import APIConnectionError, APITimeoutError
-from .._images import decode_b64, download_error, image_values, parse_image_value
+from .. import _clock
+from .._images import decode_b64, image_values, parse_image_value
 from ..types import KnownImageModel, Mode, TaskProgress, UploadOptions
+from ._http import HttpClient
 from .run import run
 
 if TYPE_CHECKING:
     from .client import Relay
 
 __all__ = ["ImageResult", "Images", "RelayImage", "normalise_images", "to_relay_image"]
-
-
-def _download_client() -> httpx.Client:
-    """A plain client for result links: never the Relay client, so never the Relay credential."""
-    return httpx.Client(follow_redirects=True, timeout=DEFAULT_TIMEOUT)
 
 
 @dataclass(frozen=True, repr=False)
@@ -36,30 +29,34 @@ class RelayImage:
     """Raw base64 (no ``data:`` prefix)."""
     mime_type: str | None = None
 
+    _transport: ClassVar[HttpClient | None] = None
+    """The client's transport (set on the images ``images.generate`` / ``edit`` return; never a dataclass field)."""
+
+    def __getstate__(self) -> dict[str, Any]:
+        """Pickle / copy without the transport (such a copy downloads over a fresh client)."""
+        return {k: v for k, v in self.__dict__.items() if k != "_transport"}
+
     def __repr__(self) -> str:
         if self.url is not None:
             return f"{type(self).__name__}(url={self.url!r})"
         return f"{type(self).__name__}(b64=<{len(self.b64 or '')} chars>, mime_type={self.mime_type!r})"
 
     def to_bytes(self) -> bytes:
-        """Downloads (URL; no Relay credential is sent) or decodes (base64) the bytes."""
+        """Downloads (URL; no Relay credential is sent) or decodes (base64) the bytes. An image ``images.generate`` /
+        ``edit`` returned downloads over that client's HTTP transport; one built by ``to_relay_image`` over a fresh one."""
         if self.url is None:
             return decode_b64(self.b64 or "")
-        with _download_client() as client:
-            try:
-                res = client.get(self.url)
-            except httpx.TimeoutException:
-                raise APITimeoutError(f"Image download timed out: {self.url}") from None
-            except httpx.TransportError as e:
-                raise APIConnectionError(f"Image download failed: {type(e).__name__}: {e}") from None
-            if not res.is_success:
-                raise download_error(res.status_code)
-            return res.content
+        if self._transport is not None:
+            return self._transport.download(self.url)
+        transport = HttpClient()
+        try:
+            return transport.download(self.url)
+        finally:
+            transport.close()
 
     def save(self, path: str | Path) -> None:
         """Writes the bytes to a file."""
-        data = self.to_bytes()
-        Path(path).write_bytes(data)
+        _clock.sync_write_bytes(path, self.to_bytes())
 
 
 @dataclass(frozen=True)
@@ -124,7 +121,10 @@ class Images:
             inline_images=inline_images,
         )
         body = cast("dict[str, Any]", raw)  # wait=True: never the 202 envelope
-        return ImageResult(images=normalise_images(body, input), raw=body)
+        images = normalise_images(body, input)
+        for img in images:
+            object.__setattr__(img, "_transport", self._relay._http)  # frozen; a ClassVar, so no field changes
+        return ImageResult(images=images, raw=body)
 
     def edit(
         self,

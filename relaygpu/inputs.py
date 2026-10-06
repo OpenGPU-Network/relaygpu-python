@@ -26,7 +26,7 @@ __all__ = [
 INLINE_IMAGE_MAX_BYTES = 4 * 1024 * 1024
 """Largest file ``inline_images=True`` encodes into the body; a larger one is uploaded."""
 
-CHUNK_SIZE = 256 * 1024
+CHUNK_SIZE = 1024 * 1024
 """Bytes per read when a path or a file object is streamed."""
 
 HEAD = 16

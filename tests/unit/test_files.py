@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import base64
 import io
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -17,7 +17,7 @@ import relaygpu._async.files as afiles
 import relaygpu._sync.files as sfiles
 from relaygpu import errors as E
 from relaygpu.inputs import INLINE_IMAGE_MAX_BYTES, sniff_media_type
-from tests.helpers import Mock, Recorded, collect, json_reply, load, maybe, relay_error
+from tests.helpers import Mock, Recorded, agen, collect, json_reply, load, maybe, relay_error
 
 UPLOAD = load("files_upload_201_20261006.json")
 UPLOAD_STREAM = load("files_upload_stream_201_20261006.json")
@@ -40,11 +40,6 @@ def q(c: Recorded) -> httpx.QueryParams:
 
 def gen(*chunks: bytes) -> Iterator[bytes]:
     yield from chunks
-
-
-async def agen(*chunks: bytes) -> AsyncIterator[bytes]:
-    for c in chunks:
-        yield c
 
 
 def write(tmp_path: Path, name: str, data: bytes) -> Path:

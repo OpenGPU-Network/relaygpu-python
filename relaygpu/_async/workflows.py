@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from time import monotonic
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
+from .. import _clock
 from .._exceptions import APITimeoutError, TaskFailedError
 from .._shapes import DEFAULT_RUN_TIMEOUT, RUN_TERMINAL, WorkflowList, WorkflowRunSubmitted, WorkflowTemplate
-from .._sleep import async_sleep
 from .._util import path_id, random_uuid
 from ..types import StoreOutput, WorkflowRunState
 
@@ -122,7 +121,7 @@ class AsyncWorkflows:
         ``APITimeoutError`` (the run keeps going). ``on_progress`` is called with the run whenever its ``status`` changes
         (including the first poll).
         """
-        deadline = monotonic() + timeout
+        deadline = _clock.monotonic() + timeout
         delay = 1.0
         last: str | None = None
         while True:
@@ -137,10 +136,10 @@ class AsyncWorkflows:
                     return run
                 rid = run.get("run_id")
                 raise TaskFailedError(run.get("error") or f"Workflow run {status}", task_id=rid if rid is not None else run_id, task=run)
-            remaining = deadline - monotonic()
+            remaining = deadline - _clock.monotonic()
             if remaining <= 0:
                 raise APITimeoutError(f"Workflow run {run_id} still {status} after {timeout:g} s")
-            await async_sleep(min(delay, remaining))
+            await _clock.async_sleep(min(delay, remaining))
             delay = min(5.0, delay * 2)
 
     async def cancel_run(self, run_id: str) -> WorkflowRunState:

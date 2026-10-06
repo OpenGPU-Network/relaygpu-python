@@ -3,8 +3,8 @@ mirror each other method for method, and relaygpu/_sync/ is exactly what scripts
 
 from __future__ import annotations
 
+import importlib.util
 import inspect
-import json
 import re
 import subprocess
 import sys
@@ -15,9 +15,22 @@ import pytest
 
 import relaygpu
 from relaygpu import AsyncRelay, Relay
+from tests.helpers import load
 
 ROOT = Path(__file__).resolve().parents[2]
-SURFACE = json.loads((ROOT / "tests" / "fixtures" / "ts_surface_0.1.0.json").read_text("utf-8"))
+SURFACE = load("ts_surface_0.1.0.json")
+
+
+def _load_unasync() -> Any:
+    """scripts/unasync.py, imported from its path: its ``rename`` is the one async → sync name table."""
+    spec = importlib.util.spec_from_file_location("unasync", ROOT / "scripts" / "unasync.py")
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+unasync = _load_unasync()
 
 
 def snake(name: str) -> str:
@@ -51,9 +64,10 @@ def test_sync_and_async_clients_mirror_each_other() -> None:
     namespaces = [ns for ns in SURFACE["namespaces"]]
     for ns in namespaces:
         s, a = resolve(sync, ns), resolve(aio, ns)
-        assert public_methods(s) == {"close" if n == "aclose" else n for n in public_methods(a)}, ns
+        async_names = {unasync.rename(n): n for n in public_methods(a)}  # sync name → async name
+        assert public_methods(s) == set(async_names), ns
         for name in public_methods(s):
-            sm, am = getattr(s, name), getattr(a, "aclose" if name == "close" else name)
+            sm, am = getattr(s, name), getattr(a, async_names[name])
             if inspect.isclass(sm) or not inspect.ismethod(sm):
                 continue
             # The sync method is never a coroutine; the async twin is one (or an async generator), except pure helpers.

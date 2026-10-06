@@ -20,6 +20,10 @@ class Audio:
     def __init__(self, relay: Relay) -> None:
         self._relay = relay
 
+    def _run(self, model: str, input: Mapping[str, Any], **options: Any) -> dict[str, Any]:
+        """The one body of ``speech`` and ``transcribe``: ``run(..., wait=True)``, so never the 202 envelope."""
+        return cast("dict[str, Any]", run(self._relay, model, input, wait=True, **options))
+
     def speech(
         self,
         model: KnownSpeechModel | str,
@@ -37,11 +41,9 @@ class Audio:
     ) -> dict[str, Any]:
         """Text-to-speech. Returns the response body: ``audio_url`` (a link that expires) or ``audio_base64`` +
         ``content_type``, per model."""
-        out = run(
-            self._relay,
+        return self._run(
             model,
             input,
-            wait=True,
             on_progress=on_progress,
             timeout=timeout,
             mode=mode,
@@ -52,7 +54,6 @@ class Audio:
             upload=upload,
             inline_images=inline_images,
         )
-        return cast("dict[str, Any]", out)
 
     def transcribe(
         self,
@@ -71,11 +72,9 @@ class Audio:
     ) -> dict[str, Any]:
         """Speech-to-text. ``audio_url`` may be a link or bytes / a path / a file-like object (uploaded first). Returns
         ``{text, language?, duration?}``."""
-        out = run(
-            self._relay,
+        return self._run(
             model,
             input,
-            wait=True,
             on_progress=on_progress,
             timeout=timeout,
             mode=mode,
@@ -86,4 +85,3 @@ class Audio:
             upload=upload,
             inline_images=inline_images,
         )
-        return cast("dict[str, Any]", out)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, cast
 
 from .._generated.types import (
@@ -17,7 +17,7 @@ from .._generated.types import (
     ProfileResponse,
     UsageTimeseriesPage,
 )
-from .._shapes import CreditHistoryParams, KeyUsageParams, MetricsParams, UsageParams, UsageTimeseriesParams, query_of
+from .._shapes import CreditHistoryParams, KeyUsageParams, MetricsParams, UsageParams, UsageTimeseriesParams
 from .._util import path_id
 
 if TYPE_CHECKING:
@@ -35,8 +35,8 @@ class AsyncAccount:
     def __init__(self, relay: AsyncRelay) -> None:
         self._relay = relay
 
-    async def _get(self, path: str, params: Any = None) -> Any:
-        res = await self._relay._http.request("GET", path, query=query_of(params) if params else None)
+    async def _get(self, path: str, params: Mapping[str, Any] | None = None) -> Any:
+        res = await self._relay._http.request("GET", path, query=params)
         return res.data
 
     async def credits(self) -> CreditsResponse:
