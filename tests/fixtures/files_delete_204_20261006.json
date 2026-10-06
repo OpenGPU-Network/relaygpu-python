@@ -1,0 +1,17 @@
+{
+  "captured": "2026-10-06",
+  "env": "staging",
+  "request": {
+    "method": "DELETE",
+    "path": "/v2/files/file_ed7b92433d63744478cb313f",
+    "contentType": null
+  },
+  "status": 204,
+  "headers": {
+    "content-type": null,
+    "x-request-id": "9c7a6d68-9eb2-4ce0-9a87-d841913b6e97",
+    "retry-after": null,
+    "idempotency-replayed": null
+  },
+  "body": null
+}

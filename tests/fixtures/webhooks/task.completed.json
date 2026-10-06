@@ -1,0 +1,10 @@
+{
+  "event": "task.completed",
+  "captured_at": "2026-10-06T08:59:47Z",
+  "headers": {
+    "webhook-id": "msg_direct:c02cfb8f-89b9-4cbd-b11e-1bb705acc58d",
+    "webhook-signature": "v1,eajUHlb9gWZ2cchN5sxsLFr6Ldhe2KeqIzERMbbadsE=",
+    "webhook-timestamp": "1791277180"
+  },
+  "body": "{\"task_id\": \"direct:c02cfb8f-89b9-4cbd-b11e-1bb705acc58d\", \"status\": \"completed\", \"elapsed_seconds\": 4, \"task_address\": null, \"mode\": \"direct\", \"model\": \"Qwen/qwen-image\", \"created_at\": \"2026-10-06T08:59:35.467407+00:00\", \"result\": {\"urls\": [\"https://cdn.relaygpu.com/content/WeI0xKQvMJiIz1Oz8o9qtQ\"], \"model\": \"Qwen/qwen-image\", \"size\": \"512x512\", \"success\": true}, \"event\": \"task.completed\"}"
+}

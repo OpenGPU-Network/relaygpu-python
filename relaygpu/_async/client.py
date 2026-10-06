@@ -1,0 +1,164 @@
+"""The async client (port of src/client.ts). ``_sync/client.py`` (``Relay``) is generated from this file."""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Mapping
+from types import TracebackType
+from typing import Any
+
+import httpx
+
+from .._core import Query, RawBody, RetryOptions
+from ..types import AsyncAccepted, CostEstimate, HealthResponse, Mode, TaskProgress, UploadOptions, UsageInput
+from ._http import _UNSET, AsyncHttpClient
+from .account import AsyncAccount
+from .audio import AsyncAudio
+from .estimate import estimate_cost
+from .files import AsyncFiles
+from .image import AsyncImages
+from .keys import AsyncKeys
+from .models import AsyncModels, AsyncPricing, AsyncTiers, health
+from .run import run
+from .tasks import AsyncTasks
+from .video import AsyncVideos
+from .webhooks import AsyncWebhooks
+from .workflows import AsyncWorkflows
+
+
+class AsyncRelay:
+    """The Relay client.
+
+    ``api_key`` (``relay_sk_…``) is sent as ``X-API-Key``; ``jwt`` (a dashboard login token) as ``Authorization:
+    Bearer``; never both. Catalog reads (``models``, ``pricing``, ``tiers``, ``health``) and task polls need no
+    credential. ``timeout`` is seconds per HTTP attempt (default 600). ``retry=False`` disables every retry.
+    """
+
+    def __init__(
+        self,
+        api_key: str | None = None,
+        *,
+        jwt: str | None = None,
+        base_url: str | None = None,
+        timeout: float | None = None,
+        retry: bool | RetryOptions | None = None,
+        default_headers: Mapping[str, str] | None = None,
+        http_client: httpx.AsyncClient | None = None,
+    ) -> None:
+        self._http = AsyncHttpClient(
+            api_key=api_key,
+            jwt=jwt,
+            base_url=base_url,
+            timeout=timeout,
+            retry=retry,
+            default_headers=default_headers,
+            http_client=http_client,
+        )
+        self.models = AsyncModels(self)
+        self.pricing = AsyncPricing(self)
+        self.tiers = AsyncTiers(self)
+        self.tasks = AsyncTasks(self)
+        self.image = AsyncImages(self)
+        self.video = AsyncVideos(self)
+        self.audio = AsyncAudio(self)
+        self.files = AsyncFiles(self)
+        self.workflows = AsyncWorkflows(self)
+        self.account = AsyncAccount(self)
+        self.keys = AsyncKeys(self)
+        self.webhooks = AsyncWebhooks(self)
+
+    @property
+    def base_url(self) -> str:
+        return self._http.base_url
+
+    def __repr__(self) -> str:
+        # Never reveal the credential when the client is logged or printed.
+        return f"AsyncRelay(base_url={self._http.base_url!r})"
+
+    async def health(self) -> HealthResponse:
+        """``GET /v2/health``."""
+        return await health(self)
+
+    async def run(
+        self,
+        model: str,
+        input: Mapping[str, Any],
+        *,
+        wait: bool = True,
+        on_progress: Callable[[TaskProgress], None] | None = None,
+        timeout: float | None = None,
+        mode: Mode | None = None,
+        store_output: str | None = None,
+        webhook_url: str | None = None,
+        idempotency_key: str | None = None,
+        async_: bool | None = None,
+        upload: UploadOptions | None = None,
+        inline_images: bool = False,
+    ) -> dict[str, Any] | AsyncAccepted:
+        """Runs any model: resolves its route through ``models.get``, submits, and (by default) waits for the result.
+
+        A sync route returns its body; an async route (or ``async_=True``) waits and returns the task's ``result``;
+        ``wait=False`` returns the ``202`` envelope instead (narrow with ``is_accepted``).
+        """
+        return await run(
+            self,
+            model,
+            input,
+            wait=wait,
+            on_progress=on_progress,
+            timeout=timeout,
+            mode=mode,
+            store_output=store_output,
+            webhook_url=webhook_url,
+            idempotency_key=idempotency_key,
+            async_=async_,
+            upload=upload,
+            inline_images=inline_images,
+        )
+
+    async def estimate_cost(self, model: str, usage: UsageInput) -> CostEstimate:
+        """Client-side estimate from ``/v2/pricing`` rows. An estimate, never an invoice."""
+        return await estimate_cost(self, model, usage)
+
+    async def request(
+        self,
+        method: str,
+        path: str,
+        *,
+        json: Any = _UNSET,
+        query: Query | None = None,
+        headers: Mapping[str, str] | None = None,
+        content: RawBody | None = None,
+        content_type: str | None = None,
+        timeout: float | None = None,
+        idempotency_key: str | None = None,
+        no_auth: bool = False,
+    ) -> Any:
+        """Escape hatch: any route, typed errors and the retry policy included. Returns the parsed body."""
+        res = await self._http.request(
+            method,
+            path,
+            json=json,
+            query=query,
+            headers=headers,
+            content=content,
+            content_type=content_type,
+            timeout=timeout,
+            idempotency_key=idempotency_key,
+            no_auth=no_auth,
+        )
+        return res.data
+
+    async def aclose(self) -> None:
+        """Closes the HTTP connection pool (not a ``http_client`` you passed in)."""
+        await self._http.aclose()
+
+    async def __aenter__(self) -> AsyncRelay:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> None:
+        await self.aclose()

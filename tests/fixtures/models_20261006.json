@@ -1,0 +1,2542 @@
+{
+ "auto": {
+  "audio": [
+   {
+    "name": "IndexTeam/IndexTTS-2",
+    "tag": "text-to-speech",
+    "store_output_supported": false,
+    "display_name": "IndexTTS 2",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/index-tts-2/generate",
+     "operation_id": "audio_index_tts_2_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "MiniMax/speech-2.8-hd",
+    "tag": "text-to-speech",
+    "store_output_supported": false,
+    "display_name": "MiniMax Speech 2.8 HD",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/minimax-speech-2-8-hd/generate",
+     "operation_id": "audio_minimax_speech_2_8_hd_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "Qwen/qwen3-tts-flash",
+    "tag": "text-to-speech",
+    "store_output_supported": true,
+    "display_name": "Qwen3 TTS Flash",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/qwen3-tts-flash/generate",
+     "operation_id": "audio_qwen3_tts_flash_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/whisper-1",
+    "tag": "speech-to-text",
+    "store_output_supported": false,
+    "display_name": "Whisper-1",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/asr/whisper",
+     "operation_id": "audio_asr_whisper",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-4o-mini-transcribe",
+    "tag": "speech-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-4o mini Transcribe",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/asr/whisper",
+     "operation_id": "audio_asr_whisper",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   }
+  ],
+  "video": [
+   {
+    "name": "Wan-AI/Wan2.5-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Wan 2.5 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/wan-25/t2v",
+     "operation_id": "video_wan_25_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "Wan-AI/Wan2.5-I2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "Wan 2.5 I2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/wan-25/i2v",
+     "operation_id": "video_wan_25_i2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "Wan-AI/Wan2.6-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Wan 2.6 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/wan-26/t2v",
+     "operation_id": "video_wan_26_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "KlingTeam/v3-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Kling v3 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/kling-3/t2v",
+     "operation_id": "video_kling_3_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "KlingTeam/v3-I2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "Kling v3 I2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/kling-3/i2v",
+     "operation_id": "video_kling_3_i2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-260128",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0/generate",
+     "operation_id": "video_doubao_seedance_2_0_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "KlingTeam/kling-video-o1",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Kling o1",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/kling-o1/generate",
+     "operation_id": "video_kling_o1_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.0-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.0 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.0/t2v",
+     "operation_id": "video_happyhorse_1_0_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.0-I2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.0 I2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.0/i2v",
+     "operation_id": "video_happyhorse_1_0_i2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.0-R2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.0 R2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.0/r2v",
+     "operation_id": "video_happyhorse_1_0_r2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.0-Video-Edit",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.0 Video Edit",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.0/video-edit",
+     "operation_id": "video_happyhorse_1_0_video_edit",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-mini-260615",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Mini",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-mini/generate",
+     "operation_id": "video_doubao_seedance_2_0_mini_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.1-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.1 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.1/t2v",
+     "operation_id": "video_happyhorse_1_1_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.1-I2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.1 I2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.1/i2v",
+     "operation_id": "video_happyhorse_1_1_i2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-260128-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_0_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-fast-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Fast V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-fast-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_0_fast_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-fast",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Fast",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-fast/generate",
+     "operation_id": "video_doubao_seedance_2_0_fast_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "decart/lucy-2.5",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Lucy 2.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/lucy-2.5/generate",
+     "operation_id": "video_lucy_2_5_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-mini-260615-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Mini V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-mini-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_0_mini_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-5-260628",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.5/generate",
+     "operation_id": "video_doubao_seedance_2_5_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-5-260628-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.5 V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.5-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_5_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "Bria/video_increase_resolution",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Bria Video Upscaler",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/bria-upscale/generate",
+     "operation_id": "video_bria_upscale_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "google/veo-3.1-fast-generate-preview",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Veo 3.1 Fast",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/veo-3.1-fast/generate",
+     "operation_id": "video_veo_3_1_fast_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-filter-off",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Filter-Off",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-filter-off/generate",
+     "operation_id": "video_doubao_seedance_2_0_filter_off_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-filter-off-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Filter-Off V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-filter-off-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_0_filter_off_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "KlingTeam/v3-Motion-Control",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Kling v3 Motion Control",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/kling-3/motion-control",
+     "operation_id": "video_kling_3_motion_control",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   }
+  ],
+  "image": [
+   {
+    "name": "black-forest-labs/FLUX-2-pro",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "FLUX.2 Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/flux/generate",
+     "operation_id": "image_flux_generate",
+     "model_in_body": true,
+     "model_default": "black-forest-labs/FLUX-2-pro",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "Qwen/qwen-image",
+    "tag": "text-to-image",
+    "store_output_supported": true,
+    "display_name": "Qwen Image",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/qwen/generate",
+     "operation_id": "image_qwen_generate",
+     "model_in_body": true,
+     "model_default": "Qwen/qwen-image",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "Qwen/qwen-image-edit",
+    "tag": "image-to-image",
+    "store_output_supported": true,
+    "display_name": "Qwen Image Edit",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/qwen/edit",
+     "operation_id": "image_qwen_edit",
+     "model_in_body": true,
+     "model_default": "Qwen/qwen-image-edit",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-1.5-T2I",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 1.5 T2I",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image/generate",
+     "operation_id": "image_gpt_image_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-1.5-I2I",
+    "tag": "image-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 1.5 I2I",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image/edit",
+     "operation_id": "image_gpt_image_edit",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-2",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 2",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image-2/generate",
+     "operation_id": "image_gpt_image_2_generate",
+     "model_in_body": true,
+     "model_default": "openai/gpt-image-2",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "google/gemini-2.5-flash-image",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "Gemini 2.5 Flash Image",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gemini-3/generate",
+     "operation_id": "image_gemini_3_generate",
+     "model_in_body": true,
+     "model_default": "google/gemini-3-pro-image",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "google/gemini-3-pro-image",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "Gemini 3 Pro Image",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gemini-3/generate",
+     "operation_id": "image_gemini_3_generate",
+     "model_in_body": true,
+     "model_default": "google/gemini-3-pro-image",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "google/gemini-3.1-flash-image-preview",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "Gemini 3.1 Flash Image",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gemini-3/generate",
+     "operation_id": "image_gemini_3_generate",
+     "model_in_body": true,
+     "model_default": "google/gemini-3-pro-image",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedream-5-0-pro-260628",
+    "tag": "text-to-image",
+    "store_output_supported": true,
+    "display_name": "Seedream 5.0 Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/seedream-5-0-pro/generate",
+     "operation_id": "image_seedream_5_0_pro_generate",
+     "model_in_body": true,
+     "model_default": "ByteDance/doubao-seedream-5-0-pro-260628",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "Wan-AI/Wan2.7-Image-Pro",
+    "tag": "text-to-image",
+    "store_output_supported": true,
+    "display_name": "Wan 2.7 Image Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/wan-2-7-image-pro/generate",
+     "operation_id": "image_wan_2_7_image_pro_generate",
+     "model_in_body": true,
+     "model_default": "Wan-AI/Wan2.7-Image-Pro",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-2.5-sunburst",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 2.5 Sunburst",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image-2/generate",
+     "operation_id": "image_gpt_image_2_generate",
+     "model_in_body": true,
+     "model_default": "openai/gpt-image-2",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-2.5-flare",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 2.5 Flare",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image-2/generate",
+     "operation_id": "image_gpt_image_2_generate",
+     "model_in_body": true,
+     "model_default": "openai/gpt-image-2",
+     "async_default": false,
+     "streams": false
+    }
+   }
+  ],
+  "anthropic": [
+   {
+    "name": "anthropic/claude-opus-4-6",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 4.6",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-sonnet-4-6",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Sonnet 4.6",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-opus-4-7",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 4.7",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-opus-4-8",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 4.8",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-fable-5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Fable 5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-haiku-4-5-20251001",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Haiku 4.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-sonnet-5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Sonnet 5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-opus-5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-fable-5-1",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Fable 5.1",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-opus-5-5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 5.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   }
+  ],
+  "openai": [
+   {
+    "name": "openai/gpt-5.4",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-5.4",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "Qwen/Qwen3.5-35B-A3B-GPTQ-Int4",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.5 35B A3B GPTQ-Int4",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "Qwen/Qwen3.5-397B-A17B-FP8",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.5 397B A17B FP8",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "deepseek-ai/DeepSeek-V4-Flash",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "DeepSeek V4 Flash",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "deepseek-ai/DeepSeek-V4-Pro",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "DeepSeek V4 Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "zai-org/glm-5.1",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GLM 5.1",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "Qwen/Qwen3.6-Plus",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.6 Plus",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-5.5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-5.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-5.4-mini",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-5.4 Mini",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-5.5-pro",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-5.5 Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "moonshotai/kimi-k2.6",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Kimi K2.6",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "zai-org/glm-5.2",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GLM 5.2",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "x-ai/grok-4.3",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Grok 4.3",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "google/gemini-3.5-flash",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Gemini 3.5 Flash",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "google/gemma-4-31B-turbo",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Gemma 4 31B Turbo",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "ibm-granite/granite-4.1-8b",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Granite 4.1 8B",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "nvidia/nemotron-3-nano-30b-a3b",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Nemotron 3 Nano 30B A3B",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "moonshotai/kimi-k3",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Kimi K3",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "google/gemma-4-26b-a4b-it",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Gemma 4 26B A4B IT",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-4o-mini",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-4o Mini",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "Qwen/Qwen3.8-Max",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.8 Max",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-6-astra",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-6 Astra",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "DeepSeek V4.1 Flash",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "zai-org/glm-5.3",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GLM 5.3",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   }
+  ],
+  "embedding": [
+   {
+    "name": "openai/text-embedding-3-small",
+    "tag": "text-to-embedding",
+    "store_output_supported": false,
+    "display_name": "Text Embedding 3 Small",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/embeddings",
+     "operation_id": "openai_embeddings",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   }
+  ]
+ },
+ "direct": {
+  "audio": [
+   {
+    "name": "IndexTeam/IndexTTS-2",
+    "tag": "text-to-speech",
+    "store_output_supported": false,
+    "display_name": "IndexTTS 2",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/index-tts-2/generate",
+     "operation_id": "audio_index_tts_2_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "MiniMax/speech-2.8-hd",
+    "tag": "text-to-speech",
+    "store_output_supported": false,
+    "display_name": "MiniMax Speech 2.8 HD",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/minimax-speech-2-8-hd/generate",
+     "operation_id": "audio_minimax_speech_2_8_hd_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "Qwen/qwen3-tts-flash",
+    "tag": "text-to-speech",
+    "store_output_supported": true,
+    "display_name": "Qwen3 TTS Flash",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/qwen3-tts-flash/generate",
+     "operation_id": "audio_qwen3_tts_flash_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/whisper-1",
+    "tag": "speech-to-text",
+    "store_output_supported": false,
+    "display_name": "Whisper-1",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/asr/whisper",
+     "operation_id": "audio_asr_whisper",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-4o-mini-transcribe",
+    "tag": "speech-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-4o mini Transcribe",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/audio/asr/whisper",
+     "operation_id": "audio_asr_whisper",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   }
+  ],
+  "video": [
+   {
+    "name": "Wan-AI/Wan2.5-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Wan 2.5 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/wan-25/t2v",
+     "operation_id": "video_wan_25_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "Wan-AI/Wan2.5-I2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "Wan 2.5 I2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/wan-25/i2v",
+     "operation_id": "video_wan_25_i2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "Wan-AI/Wan2.6-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Wan 2.6 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/wan-26/t2v",
+     "operation_id": "video_wan_26_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "KlingTeam/v3-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Kling v3 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/kling-3/t2v",
+     "operation_id": "video_kling_3_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "KlingTeam/v3-I2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "Kling v3 I2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/kling-3/i2v",
+     "operation_id": "video_kling_3_i2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-260128",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0/generate",
+     "operation_id": "video_doubao_seedance_2_0_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "KlingTeam/kling-video-o1",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Kling o1",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/kling-o1/generate",
+     "operation_id": "video_kling_o1_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.0-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.0 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.0/t2v",
+     "operation_id": "video_happyhorse_1_0_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.0-I2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.0 I2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.0/i2v",
+     "operation_id": "video_happyhorse_1_0_i2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.0-R2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.0 R2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.0/r2v",
+     "operation_id": "video_happyhorse_1_0_r2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.0-Video-Edit",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.0 Video Edit",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.0/video-edit",
+     "operation_id": "video_happyhorse_1_0_video_edit",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-mini-260615",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Mini",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-mini/generate",
+     "operation_id": "video_doubao_seedance_2_0_mini_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.1-T2V",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.1 T2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.1/t2v",
+     "operation_id": "video_happyhorse_1_1_t2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "HappyHorse/HappyHorse-1.1-I2V",
+    "tag": "image-to-video",
+    "store_output_supported": true,
+    "display_name": "HappyHorse 1.1 I2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/happyhorse-1.1/i2v",
+     "operation_id": "video_happyhorse_1_1_i2v",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-260128-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_0_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-fast-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Fast V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-fast-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_0_fast_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-fast",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Fast",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-fast/generate",
+     "operation_id": "video_doubao_seedance_2_0_fast_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "decart/lucy-2.5",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Lucy 2.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/lucy-2.5/generate",
+     "operation_id": "video_lucy_2_5_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-mini-260615-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Mini V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-mini-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_0_mini_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-5-260628",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.5/generate",
+     "operation_id": "video_doubao_seedance_2_5_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-5-260628-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.5 V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.5-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_5_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "Bria/video_increase_resolution",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Bria Video Upscaler",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/bria-upscale/generate",
+     "operation_id": "video_bria_upscale_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "google/veo-3.1-fast-generate-preview",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Veo 3.1 Fast",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/veo-3.1-fast/generate",
+     "operation_id": "video_veo_3_1_fast_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-filter-off",
+    "tag": "text-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Filter-Off",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-filter-off/generate",
+     "operation_id": "video_doubao_seedance_2_0_filter_off_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedance-2-0-filter-off-V2V",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Seedance 2.0 Filter-Off V2V",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/doubao-seedance-2.0-filter-off-v2v/generate",
+     "operation_id": "video_doubao_seedance_2_0_filter_off_v2v_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   },
+   {
+    "name": "KlingTeam/v3-Motion-Control",
+    "tag": "video-to-video",
+    "store_output_supported": true,
+    "display_name": "Kling v3 Motion Control",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/video/kling-3/motion-control",
+     "operation_id": "video_kling_3_motion_control",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": true,
+     "streams": false
+    }
+   }
+  ],
+  "image": [
+   {
+    "name": "black-forest-labs/FLUX-2-pro",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "FLUX.2 Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/flux/generate",
+     "operation_id": "image_flux_generate",
+     "model_in_body": true,
+     "model_default": "black-forest-labs/FLUX-2-pro",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "Qwen/qwen-image",
+    "tag": "text-to-image",
+    "store_output_supported": true,
+    "display_name": "Qwen Image",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/qwen/generate",
+     "operation_id": "image_qwen_generate",
+     "model_in_body": true,
+     "model_default": "Qwen/qwen-image",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "Qwen/qwen-image-edit",
+    "tag": "image-to-image",
+    "store_output_supported": true,
+    "display_name": "Qwen Image Edit",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/qwen/edit",
+     "operation_id": "image_qwen_edit",
+     "model_in_body": true,
+     "model_default": "Qwen/qwen-image-edit",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-1.5-T2I",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 1.5 T2I",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image/generate",
+     "operation_id": "image_gpt_image_generate",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-1.5-I2I",
+    "tag": "image-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 1.5 I2I",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image/edit",
+     "operation_id": "image_gpt_image_edit",
+     "model_in_body": false,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-2",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 2",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image-2/generate",
+     "operation_id": "image_gpt_image_2_generate",
+     "model_in_body": true,
+     "model_default": "openai/gpt-image-2",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "google/gemini-2.5-flash-image",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "Gemini 2.5 Flash Image",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gemini-3/generate",
+     "operation_id": "image_gemini_3_generate",
+     "model_in_body": true,
+     "model_default": "google/gemini-3-pro-image",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "google/gemini-3-pro-image",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "Gemini 3 Pro Image",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gemini-3/generate",
+     "operation_id": "image_gemini_3_generate",
+     "model_in_body": true,
+     "model_default": "google/gemini-3-pro-image",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "google/gemini-3.1-flash-image-preview",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "Gemini 3.1 Flash Image",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gemini-3/generate",
+     "operation_id": "image_gemini_3_generate",
+     "model_in_body": true,
+     "model_default": "google/gemini-3-pro-image",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "ByteDance/doubao-seedream-5-0-pro-260628",
+    "tag": "text-to-image",
+    "store_output_supported": true,
+    "display_name": "Seedream 5.0 Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/seedream-5-0-pro/generate",
+     "operation_id": "image_seedream_5_0_pro_generate",
+     "model_in_body": true,
+     "model_default": "ByteDance/doubao-seedream-5-0-pro-260628",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "Wan-AI/Wan2.7-Image-Pro",
+    "tag": "text-to-image",
+    "store_output_supported": true,
+    "display_name": "Wan 2.7 Image Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/wan-2-7-image-pro/generate",
+     "operation_id": "image_wan_2_7_image_pro_generate",
+     "model_in_body": true,
+     "model_default": "Wan-AI/Wan2.7-Image-Pro",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-2.5-sunburst",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 2.5 Sunburst",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image-2/generate",
+     "operation_id": "image_gpt_image_2_generate",
+     "model_in_body": true,
+     "model_default": "openai/gpt-image-2",
+     "async_default": false,
+     "streams": false
+    }
+   },
+   {
+    "name": "openai/gpt-image-2.5-flare",
+    "tag": "text-to-image",
+    "store_output_supported": false,
+    "display_name": "GPT Image 2.5 Flare",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/image/gpt-image-2/generate",
+     "operation_id": "image_gpt_image_2_generate",
+     "model_in_body": true,
+     "model_default": "openai/gpt-image-2",
+     "async_default": false,
+     "streams": false
+    }
+   }
+  ],
+  "anthropic": [
+   {
+    "name": "anthropic/claude-opus-4-6",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 4.6",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-sonnet-4-6",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Sonnet 4.6",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-opus-4-7",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 4.7",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-opus-4-8",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 4.8",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-fable-5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Fable 5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-haiku-4-5-20251001",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Haiku 4.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-sonnet-5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Sonnet 5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-opus-5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-fable-5-1",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Fable 5.1",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "anthropic/claude-opus-5-5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Claude Opus 5.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/anthropic/v1/messages",
+     "operation_id": "anthropic_messages",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   }
+  ],
+  "openai": [
+   {
+    "name": "openai/gpt-5.4",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-5.4",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "Qwen/Qwen3.5-35B-A3B-GPTQ-Int4",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.5 35B A3B GPTQ-Int4",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "Qwen/Qwen3.5-397B-A17B-FP8",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.5 397B A17B FP8",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "deepseek-ai/DeepSeek-V4-Flash",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "DeepSeek V4 Flash",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "deepseek-ai/DeepSeek-V4-Pro",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "DeepSeek V4 Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "zai-org/glm-5.1",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GLM 5.1",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "Qwen/Qwen3.6-Plus",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.6 Plus",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-5.5",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-5.5",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-5.4-mini",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-5.4 Mini",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-5.5-pro",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-5.5 Pro",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "moonshotai/kimi-k2.6",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Kimi K2.6",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "zai-org/glm-5.2",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GLM 5.2",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "x-ai/grok-4.3",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Grok 4.3",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "google/gemini-3.5-flash",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Gemini 3.5 Flash",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "google/gemma-4-31B-turbo",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Gemma 4 31B Turbo",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "ibm-granite/granite-4.1-8b",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Granite 4.1 8B",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "nvidia/nemotron-3-nano-30b-a3b",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Nemotron 3 Nano 30B A3B",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "moonshotai/kimi-k3",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Kimi K3",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "google/gemma-4-26b-a4b-it",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Gemma 4 26B A4B IT",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-4o-mini",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-4o Mini",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "Qwen/Qwen3.8-Max",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.8 Max",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "openai/gpt-6-astra",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GPT-6 Astra",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "DeepSeek V4.1 Flash",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "zai-org/glm-5.3",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "GLM 5.3",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   }
+  ],
+  "embedding": [
+   {
+    "name": "openai/text-embedding-3-small",
+    "tag": "text-to-embedding",
+    "store_output_supported": false,
+    "display_name": "Text Embedding 3 Small",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/embeddings",
+     "operation_id": "openai_embeddings",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": false
+    }
+   }
+  ]
+ },
+ "opengpu": {
+  "openai": [
+   {
+    "name": "Qwen/Qwen3.5-35B-A3B-GPTQ-Int4",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.5 35B A3B GPTQ-Int4",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   },
+   {
+    "name": "Qwen/Qwen3.5-397B-A17B-FP8",
+    "tag": "text-to-text",
+    "store_output_supported": false,
+    "display_name": "Qwen3.5 397B A17B FP8",
+    "endpoint": {
+     "method": "POST",
+     "path": "/v2/openai/v1/chat/completions",
+     "operation_id": "openai_chat_completions",
+     "model_in_body": true,
+     "model_default": null,
+     "async_default": false,
+     "streams": true
+    }
+   }
+  ]
+ },
+ "model_restrictions_per_tier": {
+  "guest": [
+   "direct.image.google/gemini-3-pro-image",
+   "direct.image.openai/gpt-image-1.5-T2I",
+   "direct.anthropic.anthropic/claude-sonnet-4-6",
+   "direct.openai.moonshotai/kimi-k2.5",
+   "direct.video.ByteDance/doubao-seedance-2-0-260128",
+   "direct.image.black-forest-labs/FLUX-2-pro",
+   "direct.video.Wan-AI/Wan2.5-I2V",
+   "direct.image.openai/gpt-image-1.5-I2I",
+   "direct.video.Wan-AI/Wan2.5-T2V",
+   "direct.openai.Qwen/Qwen3.5-397B-A17B-FP8",
+   "direct.video.KlingTeam/v3-I2V",
+   "direct.anthropic.anthropic/claude-opus-4-8",
+   "direct.video.KlingTeam/v3-T2V",
+   "direct.openai.zai-org/glm-5.1",
+   "direct.openai.xai/grok-4",
+   "direct.image.Qwen/qwen-image-edit",
+   "direct.anthropic.anthropic/claude-opus-4-6",
+   "direct.image.Qwen/qwen-image",
+   "direct.anthropic.anthropic/claude-opus-4-7",
+   "opengpu.openai.Qwen/Qwen3.5-35B-A3B-GPTQ-Int4",
+   "direct.video.ByteDance/doubao-seedance-1-5-pro-251215",
+   "direct.image.google/gemini-2.5-flash-image",
+   "direct.anthropic.anthropic/claude-fable-5",
+   "opengpu.openai.Qwen/Qwen3.5-397B-A17B-FP8",
+   "direct.video.KlingTeam/kling-video-o1",
+   "direct.openai.Qwen/Qwen3.5-35B-A3B-GPTQ-Int4",
+   "direct.openai.openai/gpt-5.4",
+   "direct.video.Wan-AI/Wan2.6-T2V",
+   "direct.openai.openai/gpt-5.2",
+   "direct.audio.Qwen/qwen3-tts-flash",
+   "direct.audio.IndexTeam/IndexTTS-2",
+   "direct.audio.MiniMax/speech-2.8-hd",
+   "direct.video.HappyHorse/HappyHorse-1.0-T2V",
+   "direct.video.HappyHorse/HappyHorse-1.0-I2V",
+   "direct.video.HappyHorse/HappyHorse-1.0-R2V",
+   "direct.video.HappyHorse/HappyHorse-1.0-Video-Edit",
+   "direct.openai.Qwen/Qwen3.6-Plus",
+   "direct.openai.openai/gpt-5.5",
+   "direct.openai.openai/gpt-5.4-mini",
+   "direct.openai.openai/gpt-5.5-pro",
+   "direct.openai.moonshotai/kimi-k2.6",
+   "direct.openai.zai-org/glm-5.2",
+   "direct.openai.x-ai/grok-4.3",
+   "direct.openai.google/gemini-3.5-flash",
+   "direct.openai.google/gemma-4-31B-turbo",
+   "direct.openai.google/gemma-4-26b-a4b-it",
+   "direct.openai.ibm-granite/granite-4.1-8b",
+   "direct.openai.nvidia/nemotron-3-nano-30b-a3b",
+   "direct.anthropic.anthropic/claude-haiku-4-5-20251001",
+   "direct.image.openai/gpt-image-2",
+   "direct.embedding.openai/text-embedding-3-small",
+   "direct.anthropic.anthropic/claude-sonnet-5",
+   "direct.video.ByteDance/doubao-seedance-2-0-mini-260615",
+   "direct.image.google/gemini-3.1-flash-image-preview",
+   "direct.video.ByteDance/doubao-seedance-2-0-fast",
+   "direct.video.HappyHorse/HappyHorse-1.1-T2V",
+   "direct.video.HappyHorse/HappyHorse-1.1-I2V",
+   "direct.video.ByteDance/doubao-seedance-2-0-260128-V2V",
+   "direct.video.ByteDance/doubao-seedance-2-0-fast-V2V",
+   "direct.openai.moonshotai/kimi-k3",
+   "direct.video.decart/lucy-2.5",
+   "direct.video.decart/lucy-vton-3",
+   "direct.anthropic.anthropic/claude-opus-5",
+   "direct.video.ByteDance/doubao-seedance-2-0-mini-260615-V2V",
+   "direct.video.ByteDance/doubao-seedance-2-5-260628",
+   "direct.video.ByteDance/doubao-seedance-2-5-260628-V2V",
+   "direct.video.Bria/video_increase_resolution",
+   "direct.openai.openai/gpt-4o-mini",
+   "direct.openai.Qwen/Qwen3.8-Max",
+   "direct.image.TencentARC/RealESRGAN-x4plus",
+   "direct.image.TencentARC/RealESRGAN-x2plus",
+   "direct.image.TencentARC/RealESRGAN-x4plus-anime",
+   "direct.video.google/veo-3.1-fast-generate-preview",
+   "direct.anthropic.anthropic/claude-fable-5-1",
+   "direct.openai.openai/gpt-6-astra",
+   "opengpu.image.TencentARC/RealESRGAN-x4plus",
+   "opengpu.image.TencentARC/RealESRGAN-x2plus",
+   "opengpu.image.TencentARC/RealESRGAN-x4plus-anime",
+   "direct.image.black-forest-labs/FLUX.2-klein-4B",
+   "opengpu.image.black-forest-labs/FLUX.2-klein-4B",
+   "direct.video.ByteDance/doubao-seedance-2-0-filter-off",
+   "direct.video.ByteDance/doubao-seedance-2-0-filter-off-V2V",
+   "direct.image.ByteDance/doubao-seedream-5-0-pro-260628",
+   "direct.openai.deepseek-ai/DeepSeek-V4.1-Flash",
+   "direct.image.Wan-AI/Wan2.7-Image-Pro",
+   "direct.audio.openai/whisper-1",
+   "direct.audio.openai/gpt-4o-mini-transcribe",
+   "direct.image.openai/gpt-image-2.5-sunburst",
+   "direct.image.openai/gpt-image-2.5-flare",
+   "direct.video.KlingTeam/v3-Motion-Control",
+   "direct.anthropic.anthropic/claude-opus-5-5",
+   "direct.openai.zai-org/glm-5.3"
+  ],
+  "basic": [
+   "direct.video.ByteDance/doubao-seedance-2-0-filter-off-V2V",
+   "direct.video.ByteDance/doubao-seedance-2-0-filter-off"
+  ],
+  "pro": [
+   "direct.video.ByteDance/doubao-seedance-2-0-filter-off-V2V",
+   "direct.video.ByteDance/doubao-seedance-2-0-filter-off"
+  ],
+  "max": [
+   "direct.video.ByteDance/doubao-seedance-2-0-filter-off-V2V",
+   "direct.video.ByteDance/doubao-seedance-2-0-filter-off"
+  ]
+ }
+}

@@ -1,0 +1,32 @@
+{
+  "captured": "2026-10-06",
+  "env": "staging",
+  "request": {
+    "method": "POST",
+    "path": "/v2/files?retention=relay1h&filename=tiny.mp4",
+    "contentType": "video/mp4"
+  },
+  "status": 201,
+  "headers": {
+    "content-type": "application/json",
+    "x-request-id": "c5f2f725-3135-4bb8-b2dc-b969c25a4385",
+    "retry-after": null,
+    "idempotency-replayed": null
+  },
+  "body": {
+    "file_id": "file_503142c7c7c9c1d03cdd6c59",
+    "url": "https://cdn.relaygpu.com/content/q2MgXy_iWEYDr5tMn3pAIw",
+    "source": "upload",
+    "content_type": "video/mp4",
+    "size_bytes": 4096,
+    "retention": "relay1h",
+    "expires_at": "2026-10-06T08:53:13Z",
+    "seconds_left": 3599,
+    "cost_usd": 0,
+    "created_at": "2026-10-06T07:53:13.837726Z",
+    "status": "ready",
+    "task_id": null,
+    "workflow_run_id": null,
+    "used_by": []
+  }
+}

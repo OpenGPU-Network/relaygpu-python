@@ -1,0 +1,37 @@
+{
+  "captured": "2026-10-06",
+  "env": "staging",
+  "request": {
+    "method": "GET",
+    "path": "/v2/files?source=upload&limit=1",
+    "contentType": null
+  },
+  "status": 200,
+  "headers": {
+    "content-type": "application/json",
+    "x-request-id": "febc62f6-5841-476c-94ce-6e20ca482726",
+    "retry-after": null,
+    "idempotency-replayed": null
+  },
+  "body": {
+    "files": [
+      {
+        "file_id": "file_503142c7c7c9c1d03cdd6c59",
+        "url": "https://cdn.relaygpu.com/content/q2MgXy_iWEYDr5tMn3pAIw",
+        "source": "upload",
+        "content_type": "video/mp4",
+        "size_bytes": 4096,
+        "retention": "relay1h",
+        "expires_at": "2026-10-06T08:53:13Z",
+        "seconds_left": 3598,
+        "cost_usd": 0,
+        "created_at": "2026-10-06T07:53:13.837000Z",
+        "status": "ready",
+        "task_id": null,
+        "workflow_run_id": null,
+        "used_by": []
+      }
+    ],
+    "next_cursor": "file_503142c7c7c9c1d03cdd6c59"
+  }
+}

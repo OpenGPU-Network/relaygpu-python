@@ -1,0 +1,85 @@
+{
+ "accepted": {
+  "method": "POST",
+  "path": "/v2/video/kling-3/t2v",
+  "request_body": {
+   "prompt": "A red ball rolling slowly across a wooden table",
+   "duration": 5,
+   "quality_mode": "std",
+   "sound": false,
+   "aspect_ratio": "16:9"
+  },
+  "request_headers": [
+   "Idempotency-Key"
+  ],
+  "status": 202,
+  "headers": {
+   "x-request-id": "e277fdaa-6953-4f59-b708-bf4867371a7d",
+   "content-type": "application/json"
+  },
+  "ms": 164,
+  "body": {
+   "task_id": "direct:85663dc7-9643-43d5-a33b-37a19f6469db",
+   "status": "queued",
+   "poll_url": "/v2/tasks/direct:85663dc7-9643-43d5-a33b-37a19f6469db"
+  }
+ },
+ "completed": {
+  "path": "/v2/tasks/direct:85663dc7-9643-43d5-a33b-37a19f6469db?wait=30",
+  "status": 200,
+  "headers": {
+   "x-request-id": "e745be71-94da-4a60-ba5d-32a1499e14f3",
+   "content-type": "application/json"
+  },
+  "body": {
+   "task_id": "direct:85663dc7-9643-43d5-a33b-37a19f6469db",
+   "status": "completed",
+   "elapsed_seconds": 121,
+   "task_address": null,
+   "mode": "direct",
+   "model": "KlingTeam/v3-T2V",
+   "created_at": "2026-10-06T07:54:15.344847+00:00",
+   "result": {
+    "urls": [
+     "https://cdn.relaygpu.com/content/7p0nWpY8BfyDclJOUNngPg"
+    ],
+    "model": "KlingTeam/v3-T2V",
+    "aspect_ratio": "16:9",
+    "duration": 5
+   },
+   "error": null
+  }
+ },
+ "polls": [
+  {
+   "status": 200,
+   "task_status": "running",
+   "ms": 30138,
+   "elapsed_seconds": 30
+  },
+  {
+   "status": 200,
+   "task_status": "running",
+   "ms": 30109,
+   "elapsed_seconds": 60
+  },
+  {
+   "status": 200,
+   "task_status": "running",
+   "ms": 30180,
+   "elapsed_seconds": 90
+  },
+  {
+   "status": 200,
+   "task_status": "running",
+   "ms": 30104,
+   "elapsed_seconds": 120
+  },
+  {
+   "status": 200,
+   "task_status": "completed",
+   "ms": 1605,
+   "elapsed_seconds": 121
+  }
+ ]
+}
