@@ -35,7 +35,7 @@ Homepage = "https://relaygpu.com"
 Repository = "https://github.com/OpenGPU-Network/relaygpu-python"
 
 [tool.hatch.build.targets.sdist]
-include = ["relaygpu", "README.md", "LICENSE", "CHANGELOG.md", "pyproject.toml"]
+include = ["/relaygpu", "/README.md", "/LICENSE", "/CHANGELOG.md", "/pyproject.toml"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["relaygpu"]

@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 SNIPPET = """
 from relaygpu import (AsyncRelay, ContentPolicyDeclinedError, FileTooLargeError, KeyBudgetExhaustedError, Relay,
     RelayError, TaskFailedError, WebhookVerificationError, error_from_response, is_accepted, verify_webhook)
@@ -20,6 +22,7 @@ def f(r: Relay) -> None:
 
 
 def test_mypy_sees_the_public_surface(tmp_path: Path) -> None:
+    pytest.importorskip("mypy")  # a dev dependency: absent when the suite runs against an installed wheel
     p = tmp_path / "snippet.py"
     p.write_text(SNIPPET)
     res = subprocess.run(

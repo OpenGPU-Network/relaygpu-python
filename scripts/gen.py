@@ -47,7 +47,9 @@ def load_spec(path: str | None) -> tuple[dict[str, Any], str]:
         return json.loads(Path(path).read_text("utf-8")), path
     base = os.environ.get("RELAY_BASE_URL") or "https://relaygpu.com"
     url = os.environ.get("RELAY_SPEC_URL") or f"{base.rstrip('/')}/v2/openapi-public.json"
-    with urllib.request.urlopen(url, timeout=60) as res:
+    # An explicit User-Agent: the CDN in front of the spec answers 403 to urllib's default `Python-urllib/3.x`.
+    req = urllib.request.Request(url, headers={"User-Agent": "relaygpu-python-gen/1", "Accept": "application/json"})
+    with urllib.request.urlopen(req, timeout=60) as res:
         return json.loads(res.read()), url
 
 
