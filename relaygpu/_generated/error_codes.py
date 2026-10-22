@@ -170,6 +170,18 @@ class ModelRetiredError(PermissionDeniedError):
     """`MODEL_RETIRED` (HTTP 403)."""
 
 
+class OauthGrantNotFoundError(NotFoundError):
+    """`OAUTH_GRANT_NOT_FOUND` (HTTP 404)."""
+
+
+class OauthTxnDecidedError(ConflictError):
+    """`OAUTH_TXN_DECIDED` (HTTP 409)."""
+
+
+class OauthTxnNotFoundError(NotFoundError):
+    """`OAUTH_TXN_NOT_FOUND` (HTTP 404)."""
+
+
 class PaymentServiceUnavailableError(CapacityError):
     """`PAYMENT_SERVICE_UNAVAILABLE` (HTTP 503)."""
 
@@ -214,8 +226,52 @@ class RefundNotFoundError(NotFoundError):
     """`REFUND_NOT_FOUND` (HTTP 404)."""
 
 
+class RoutingDocNotFoundError(NotFoundError):
+    """`ROUTING_DOC_NOT_FOUND` (HTTP 404)."""
+
+
+class RoutingEngineUnknownError(ValidationError):
+    """`ROUTING_ENGINE_UNKNOWN` (HTTP 422)."""
+
+
+class RoutingListTooLongError(ValidationError):
+    """`ROUTING_LIST_TOO_LONG` (HTTP 422)."""
+
+
+class RoutingListUnknownError(ValidationError):
+    """`ROUTING_LIST_UNKNOWN` (HTTP 422)."""
+
+
+class RoutingModelRestrictedError(PermissionDeniedError):
+    """`ROUTING_MODEL_RESTRICTED` (HTTP 403)."""
+
+
+class RoutingModelUnknownError(ValidationError):
+    """`ROUTING_MODEL_UNKNOWN` (HTTP 422)."""
+
+
+class RoutingModelUnscoredError(ValidationError):
+    """`ROUTING_MODEL_UNSCORED` (HTTP 422)."""
+
+
+class RoutingModelVetoedError(ValidationError):
+    """`ROUTING_MODEL_VETOED` (HTTP 422)."""
+
+
+class RoutingNoCandidatesError(ValidationError):
+    """`ROUTING_NO_CANDIDATES` (HTTP 422)."""
+
+
+class RoutingOnFixedModelError(ValidationError):
+    """`ROUTING_ON_FIXED_MODEL` (HTTP 422)."""
+
+
 class ScopeDeniedError(PermissionDeniedError):
     """`SCOPE_DENIED` (HTTP 403)."""
+
+
+class ServiceUnavailableError(CapacityError):
+    """`SERVICE_UNAVAILABLE` (HTTP 503)."""
 
 
 class SuperkeyConflictError(ConflictError):
@@ -306,6 +362,9 @@ ERROR_CODE_CLASSES: dict[str, type[RelayAPIError]] = {
     "MODEL_NOT_AVAILABLE": ModelNotAvailableError,
     "MODEL_NOT_FOUND": ModelNotFoundError,
     "MODEL_RETIRED": ModelRetiredError,
+    "OAUTH_GRANT_NOT_FOUND": OauthGrantNotFoundError,
+    "OAUTH_TXN_DECIDED": OauthTxnDecidedError,
+    "OAUTH_TXN_NOT_FOUND": OauthTxnNotFoundError,
     "PAYMENT_SERVICE_UNAVAILABLE": PaymentServiceUnavailableError,
     "PROMO_ALREADY_REDEEMED": PromoAlreadyRedeemedError,
     "PROMO_CODE_EXHAUSTED": PromoCodeExhaustedError,
@@ -317,7 +376,18 @@ ERROR_CODE_CLASSES: dict[str, type[RelayAPIError]] = {
     "RECEIVABLE_LIMIT_EXCEEDED": ReceivableLimitExceededError,
     "RECEIVABLE_OVERDUE": ReceivableOverdueError,
     "REFUND_NOT_FOUND": RefundNotFoundError,
+    "ROUTING_DOC_NOT_FOUND": RoutingDocNotFoundError,
+    "ROUTING_ENGINE_UNKNOWN": RoutingEngineUnknownError,
+    "ROUTING_LIST_TOO_LONG": RoutingListTooLongError,
+    "ROUTING_LIST_UNKNOWN": RoutingListUnknownError,
+    "ROUTING_MODEL_RESTRICTED": RoutingModelRestrictedError,
+    "ROUTING_MODEL_UNKNOWN": RoutingModelUnknownError,
+    "ROUTING_MODEL_UNSCORED": RoutingModelUnscoredError,
+    "ROUTING_MODEL_VETOED": RoutingModelVetoedError,
+    "ROUTING_NO_CANDIDATES": RoutingNoCandidatesError,
+    "ROUTING_ON_FIXED_MODEL": RoutingOnFixedModelError,
     "SCOPE_DENIED": ScopeDeniedError,
+    "SERVICE_UNAVAILABLE": ServiceUnavailableError,
     "SUPERKEY_CONFLICT": SuperkeyConflictError,
     "SYSTEM_KEY_IMMUTABLE": SystemKeyImmutableError,
     "TASK_NOT_FOUND": TaskNotFoundError,
@@ -373,6 +443,9 @@ __all__ = [
     "ModelNotAvailableError",
     "ModelNotFoundError",
     "ModelRetiredError",
+    "OauthGrantNotFoundError",
+    "OauthTxnDecidedError",
+    "OauthTxnNotFoundError",
     "PaymentServiceUnavailableError",
     "PromoAlreadyRedeemedError",
     "PromoCodeExhaustedError",
@@ -384,7 +457,18 @@ __all__ = [
     "ReceivableLimitExceededError",
     "ReceivableOverdueError",
     "RefundNotFoundError",
+    "RoutingDocNotFoundError",
+    "RoutingEngineUnknownError",
+    "RoutingListTooLongError",
+    "RoutingListUnknownError",
+    "RoutingModelRestrictedError",
+    "RoutingModelUnknownError",
+    "RoutingModelUnscoredError",
+    "RoutingModelVetoedError",
+    "RoutingNoCandidatesError",
+    "RoutingOnFixedModelError",
     "ScopeDeniedError",
+    "ServiceUnavailableError",
     "SuperkeyConflictError",
     "SystemKeyImmutableError",
     "TaskNotFoundError",

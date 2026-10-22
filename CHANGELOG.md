@@ -3,6 +3,16 @@
 `relaygpu-client` versions track the TypeScript client [`@relaygpu/client`](https://www.npmjs.com/package/@relaygpu/client)
 minor for minor: 0.1.x here is the port of 0.1.x there. The API may change before 1.0.
 
+## 0.1.1 (2026-10-22)
+
+- **Generated types** follow the prod public spec of 2026-10-22: Claude is served through RelayConductor
+  (`relay/conductor` on the OpenAI-compatible route), so the Anthropic-compatible route lists no models;
+  `relay/music-1`, `relay/tts-1`, `relay/tts-1-turbo`, `relay/stt-1`, `MiniMax/MiniMax-H3`, `relay/conductor`,
+  `KlingTeam/v3-Omni` and `google/gemini-nano-banana-2.1` are in the model map; the Qwen image pair and
+  `google/gemini-3.5-flash` are gone.
+- **Error statuses** for the OAuth, routing and `SERVICE_UNAVAILABLE` codes, so they map to their typed errors
+  instead of the status class.
+
 ## 0.1.0 (unreleased)
 
 First release: a port of `@relaygpu/client` 0.1.0.

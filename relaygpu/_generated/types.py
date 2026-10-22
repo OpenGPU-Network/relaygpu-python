@@ -17,7 +17,7 @@ ASRRequest = TypedDict(
     "ASRRequest",
     {
         "audio_url": 'Required[str]',
-        "model": 'Required[Literal["openai/whisper-large-v3", "openai/whisper-1", "openai/gpt-4o-mini-transcribe"]]',
+        "model": 'Required[Literal["openai/whisper-large-v3", "openai/whisper-1", "openai/gpt-4o-mini-transcribe", "relay/stt-1"]]',
         "language": 'str | None',
         "prompt": 'str | None',
         "temperature": 'float | None',
@@ -25,6 +25,20 @@ ASRRequest = TypedDict(
         "return_timestamps": 'bool | Literal["word"] | None',
         "chunk_length_s": 'int | None',
         "batch_size": 'int | None',
+        "tag_audio_events": 'bool | None',
+        "num_speakers": 'int | None',
+        "timestamps_granularity": 'Literal["none", "word", "character"] | None',
+        "diarize": 'bool | None',
+        "diarization_threshold": 'float | None',
+        "additional_formats": 'list[Stt1AdditionalFormat] | None',
+        "file_format": 'Literal["pcm_s16le_16", "other"] | None',
+        "seed": 'int | None',
+        "use_multi_channel": 'bool | None',
+        "multichannel_output_style": 'Literal["separate", "combined"] | None',
+        "entity_detection": 'str | list[str] | None',
+        "entity_redaction": 'str | list[str] | None',
+        "entity_redaction_mode": 'Literal["redacted", "entity_type", "enumerated_entity_type"] | None',
+        "no_verbatim": 'bool | None',
         "mode": 'Literal["auto", "direct"] | None',
         "async": 'bool | None',
         "webhook_url": 'str | None',
@@ -39,6 +53,14 @@ class ASRResponse(TypedDict, total=False):
     text: Required[str]
     language: str | None
     duration: float | None
+    billable_seconds: float | None
+    language_code: str | None
+    language_probability: float | None
+    audio_duration_secs: float | None
+    words: list[dict[str, Any]] | None
+    entities: list[dict[str, Any]] | None
+    transcripts: list[dict[str, Any]] | None
+    additional_formats: list[dict[str, Any]] | None
     task_id: str | None
     task_address: str | None
     mode: str | None
@@ -193,6 +215,60 @@ class CatalogRow(TypedDict, total=False):
     availability: Required[Availability]
 
 
+class ConductorDetail(TypedDict, total=False):
+    """RelayConductor's ladders, as `GET /v2/models/relay%2Fconductor` returns them."""
+
+    usecases: Required[dict[str, ConductorUseCase]]
+    max_models: Required[int]
+
+
+class ConductorExcluded(TypedDict, total=False):
+    """A model RelayConductor does not route to for a use case."""
+
+    model: Required[str]
+    effort: str | None
+    reason: Required[Literal["excluded", "unscored", "dropped", "pending", "not_in_catalogue"]]
+    why: str | None
+
+
+class ConductorList(TypedDict, total=False):
+    """One candidate list's two ladders for a use case."""
+
+    stream: Required[ConductorTable]
+    sync: Required[ConductorTable]
+
+
+class ConductorRung(TypedDict, total=False):
+    """One rung of a RelayConductor ladder: the model and effort it serves."""
+
+    rung: Required[int]
+    model: Required[str]
+    effort: Required[str]
+    score: float | None
+    price: float | None
+    floors: Required[dict[str, int]]
+    reason: str | None
+    expert: str | None
+    carried_from: int | None
+
+
+class ConductorTable(TypedDict, total=False):
+    """A ladder: rungs 1–4 for one list, one use case and one request kind."""
+
+    rungs: Required[list[ConductorRung]]
+    empty: Required[dict[str, str]]
+    pending: Required[dict[str, list[str]]]
+    peak: ConductorRung | None
+
+
+class ConductorUseCase(TypedDict, total=False):
+    """Everything RelayConductor does for one use case."""
+
+    lists: Required[dict[str, ConductorList]]
+    conductable: Required[list[str]]
+    excluded: Required[list[ConductorExcluded]]
+
+
 class ContainerConnection(TypedDict, total=False):
     """`managed_container`: `ssh -p <port> <user>@<hostname>`."""
 
@@ -214,6 +290,7 @@ class CreateKeyRequest(TypedDict, total=False):
     name: Required[str]
     restrictions: KeyRestrictions | None
     key_budget: float | None
+    instances_allowed: bool
 
 
 class CreateKeyResponse(TypedDict, total=False):
@@ -227,6 +304,7 @@ class CreateKeyResponse(TypedDict, total=False):
     restrictions: Required[CreatedKeyRestrictions]
     key_budget: Required[float | None]
     is_superkey: Required[bool]
+    instances_allowed: Required[bool]
     warning: Required[str]
 
 
@@ -250,10 +328,11 @@ class CreditTransaction(TypedDict, total=False):
     """CreditTransaction"""
 
     action: Required[str]
-    amount: Required[int]
+    amount: float | None
     via: Required[str]
     reason: Required[str]
     created_at: Required[str]
+    details: dict[str, Any]
 
 
 class CreditsResponse(TypedDict, total=False):
@@ -263,6 +342,8 @@ class CreditsResponse(TypedDict, total=False):
     total_consumed: Required[float]
     promo_consumed: float
     total_allocated: Required[float]
+    promo_allocated: float
+    adjustments: float
     consumed_by_mode: Required[dict[str, float]]
     last_topup: Required[dict[str, Any] | None]
     promos: list[PromoBalance] | None
@@ -317,6 +398,34 @@ class CustomerSettingsUpdate(TypedDict, total=False):
     """CustomerSettingsUpdate"""
 
     warning_threshold: Required[float]
+
+
+class CustomerTaskItem(TypedDict, total=False):
+    """One async task from your history."""
+
+    task_id: Required[str]
+    model: str | None
+    source: str | None
+    endpoint: str | None
+    status: Required[Literal["queued", "running", "completed", "failed", "unknown"]]
+    error_code: str | None
+    created_at: Required[str]
+    duration_ms: float | None
+    cost_usd: float | None
+    billed: Required[bool]
+    no_bill_reason: str | None
+    prompt: str | None
+    urls: list[str]
+    expires_at: str | None
+
+
+class CustomerTaskPage(TypedDict, total=False):
+    """CustomerTaskPage"""
+
+    object: str
+    data: Required[list[CustomerTaskItem]]
+    has_more: Required[bool]
+    next_page: str | None
 
 
 class CustomerUsageResponse(TypedDict, total=False):
@@ -414,6 +523,62 @@ class DoubaoSeedance20Response(TypedDict, total=False):
     task_id: str | None
     task_address: str | None
     mode: str | None
+
+
+# The Seedance 2.0 body for the mini and fast tiers: resolution tops out at 720p.
+DoubaoSeedance20Up720pRequest = TypedDict(
+    "DoubaoSeedance20Up720pRequest",
+    {
+        "store_output": 'Literal["provider", "relay1d", "relay7d", "relay30d"] | None',
+        "prompt": 'str | None',
+        "first_frame_url": 'str | None',
+        "last_frame_url": 'str | None',
+        "reference_image_url": 'str | None',
+        "reference_image_urls": 'list[str] | None',
+        "reference_video_url": 'str | None',
+        "reference_audio_url": 'str | None',
+        "resolution": 'Literal["480p", "720p"] | None',
+        "ratio": 'Literal["16:9", "4:3", "1:1", "3:4", "9:16", "21:9", "adaptive"] | None',
+        "duration": 'int | None',
+        "generate_audio": 'bool | None',
+        "camera_fixed": 'bool | None',
+        "watermark": 'bool | None',
+        "seed": 'int | None',
+        "execution_expires_after": 'int | None',
+        "mode": 'Literal["auto", "direct"] | None',
+        "async": 'bool | None',
+        "webhook_url": 'str | None',
+    },
+    total=False,
+)
+
+
+# The Seedance 2.0 video-to-video body for the mini and fast tiers: resolution tops out at 720p.
+DoubaoSeedance20Up720pV2VRequest = TypedDict(
+    "DoubaoSeedance20Up720pV2VRequest",
+    {
+        "store_output": 'Literal["provider", "relay1d", "relay7d", "relay30d"] | None',
+        "prompt": 'str | None',
+        "first_frame_url": 'str | None',
+        "last_frame_url": 'str | None',
+        "reference_image_url": 'str | None',
+        "reference_image_urls": 'list[str] | None',
+        "reference_video_url": 'Required[str]',
+        "reference_audio_url": 'str | None',
+        "resolution": 'Literal["480p", "720p"] | None',
+        "ratio": 'Literal["16:9", "4:3", "1:1", "3:4", "9:16", "21:9", "adaptive"] | None',
+        "duration": 'int | None',
+        "generate_audio": 'bool | None',
+        "camera_fixed": 'bool | None',
+        "watermark": 'bool | None',
+        "seed": 'int | None',
+        "execution_expires_after": 'int | None',
+        "mode": 'Literal["auto", "direct"] | None',
+        "async": 'bool | None',
+        "webhook_url": 'str | None',
+    },
+    total=False,
+)
 
 
 # Request schema for the base (non-V2V) Doubao Seedance 2.5 route.
@@ -605,6 +770,7 @@ FluxRequest = TypedDict(
 class FluxResponse(TypedDict, total=False):
     """Response schema for FLUX image generation"""
 
+    urls: list[str] | None
     images: Required[list[str]]
     model: Required[str]
     width: Required[int]
@@ -623,7 +789,7 @@ GeminiRequest = TypedDict(
         "model": 'str | None',
         "image": 'str | None',
         "images": 'list[str] | None',
-        "aspect_ratio": 'Literal["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"] | None',
+        "aspect_ratio": 'Literal["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9", "1:4", "4:1", "1:8", "8:1"] | None',
         "image_size": 'Literal["0.5K", "1K", "2K", "4K"] | None',
         "mode": 'Literal["auto", "direct"] | None',
         "async": 'bool | None',
@@ -636,9 +802,10 @@ GeminiRequest = TypedDict(
 class GeminiResponse(TypedDict, total=False):
     """Response schema for Gemini image generation"""
 
+    urls: list[str] | None
     images: Required[list[str]]
     model: Required[str]
-    aspect_ratio: Required[str]
+    aspect_ratio: Required[str | None]
     image_size: Required[str]
     finish_reason: str | None
     task_id: str | None
@@ -653,8 +820,8 @@ GptImage2Request = TypedDict(
         "store_output": 'Literal["provider", "relay1d", "relay7d", "relay30d"] | None',
         "model": 'Literal["openai/gpt-image-2", "openai/gpt-image-2.5-sunburst", "openai/gpt-image-2.5-flare"]',
         "prompt": 'Required[str]',
-        "size": 'Literal["1024x768", "1024x1024", "1024x1536", "1536x1024", "1920x1080", "2560x1440", "3840x2160"] | None',
-        "quality": 'Literal["low", "medium", "high"] | None',
+        "size": 'Literal["1024x768", "1024x1024", "1024x1536", "1536x1024", "2560x1440", "3840x2160"] | None',
+        "quality": 'Literal["low", "medium", "high", "auto", "xhigh", "max"] | None',
         "n": 'int | None',
         "output_format": 'Literal["png", "jpeg"] | None',
         "output_compression": 'int | None',
@@ -671,6 +838,7 @@ GptImage2Request = TypedDict(
 class GptImage2Response(TypedDict, total=False):
     """Response schema for GPT Image 2 generation."""
 
+    urls: list[str] | None
     images: Required[list[str]]
     model: str
     size: str | None
@@ -703,6 +871,7 @@ GptImageI2IRequest = TypedDict(
 class GptImageI2IResponse(TypedDict, total=False):
     """Response schema for GPT Image image-to-image editing"""
 
+    urls: list[str] | None
     images: Required[list[str]]
     model: str
     size: str | None
@@ -733,6 +902,7 @@ GptImageT2IRequest = TypedDict(
 class GptImageT2IResponse(TypedDict, total=False):
     """Response schema for GPT Image text-to-image generation"""
 
+    urls: list[str] | None
     images: Required[list[str]]
     model: str
     size: str | None
@@ -987,6 +1157,7 @@ class InstanceView(TypedDict, total=False):
     hours_billed: float
     spend_usd: float
     webhook_url: str | None
+    key_id: str | None
 
 
 class InstanceWebhookPayload(TypedDict, total=False):
@@ -1062,6 +1233,7 @@ class KeyResponse(TypedDict, total=False):
     last_used_at: Required[str | None]
     restrictions: Required[dict[str, Any]]
     key_budget: float | None
+    instances_allowed: bool
     is_superkey: bool
     system: bool
 
@@ -1084,6 +1256,7 @@ class KeyWithAnalytics(TypedDict, total=False):
     last_used_at: Required[str | None]
     analytics: Required[KeyAnalytics]
     key_budget: float | None
+    instances_allowed: bool
     is_superkey: bool
     system: bool
 
@@ -1188,11 +1361,14 @@ KlingV3I2VRequest = TypedDict(
     "KlingV3I2VRequest",
     {
         "store_output": 'Literal["provider", "relay1d", "relay7d", "relay30d"] | None',
-        "prompt": 'Required[str]',
+        "prompt": 'str | None',
         "image": 'Required[str]',
         "image_tail": 'str | None',
         "aspect_ratio": 'Literal["16:9", "9:16", "1:1"] | None',
         "duration": 'int | None',
+        "multi_shot": 'bool | None',
+        "shot_type": 'Literal["customize"] | None',
+        "multi_prompt": 'list[KlingV3Shot] | None',
         "quality_mode": 'Literal["std", "pro"] | None',
         "sound": 'bool | None',
         "negative_prompt": 'str | None',
@@ -1242,11 +1418,59 @@ class KlingV3MotionControlResponse(TypedDict, total=False):
 
     urls: Required[list[str]]
     model: str
-    aspect_ratio: str | None
     duration: Required[int]
     task_id: str | None
     task_address: str | None
     mode: str | None
+
+
+# Request schema for Kling v3 Omni: one route for text-to-video,
+KlingV3OmniRequest = TypedDict(
+    "KlingV3OmniRequest",
+    {
+        "store_output": 'Literal["provider", "relay1d", "relay7d", "relay30d"] | None',
+        "prompt": 'str | None',
+        "negative_prompt": 'str | None',
+        "quality_mode": 'Literal["std", "pro"] | None',
+        "aspect_ratio": 'Literal["16:9", "9:16", "1:1"] | None',
+        "duration": 'int | None',
+        "multi_shot": 'bool | None',
+        "shot_type": 'Literal["customize"] | None',
+        "multi_prompt": 'list[KlingV3Shot] | None',
+        "sound": 'bool | None',
+        "first_frame_url": 'str | None',
+        "end_frame_url": 'str | None',
+        "reference_image_urls": 'list[str] | None',
+        "reference_video_url": 'str | None',
+        "reference_video_keep_audio": 'bool | None',
+        "base_video_url": 'str | None',
+        "base_video_keep_audio": 'bool | None',
+        "mode": 'Literal["auto", "direct"] | None',
+        "async": 'bool | None',
+        "webhook_url": 'str | None',
+    },
+    total=False,
+)
+
+
+class KlingV3OmniResponse(TypedDict, total=False):
+    """Response schema for Kling v3 Omni video generation. `duration` is the"""
+
+    urls: Required[list[str]]
+    model: str
+    aspect_ratio: str | None
+    duration: float | None
+    task_id: str | None
+    task_address: str | None
+    mode: str | None
+
+
+class KlingV3Shot(TypedDict, total=False):
+    """One shot of a Kling v3 multi-shot video."""
+
+    index: Required[int]
+    prompt: Required[str]
+    duration: Required[int]
 
 
 # Request schema for Kling v3 text-to-video generation.
@@ -1254,9 +1478,12 @@ KlingV3T2VRequest = TypedDict(
     "KlingV3T2VRequest",
     {
         "store_output": 'Literal["provider", "relay1d", "relay7d", "relay30d"] | None',
-        "prompt": 'Required[str]',
+        "prompt": 'str | None',
         "aspect_ratio": 'Literal["16:9", "9:16", "1:1"] | None',
         "duration": 'int | None',
+        "multi_shot": 'bool | None',
+        "shot_type": 'Literal["customize"] | None',
+        "multi_prompt": 'list[KlingV3Shot] | None',
         "quality_mode": 'Literal["std", "pro"] | None',
         "sound": 'bool | None',
         "negative_prompt": 'str | None',
@@ -1402,6 +1629,38 @@ class MetricsSummary(TypedDict, total=False):
     results: Required[list[MetricsResult]]
 
 
+# Request schema for MiniMax H3 video generation (T2V / I2V / R2V).
+MiniMaxH3Request = TypedDict(
+    "MiniMaxH3Request",
+    {
+        "store_output": 'Literal["provider", "relay1d", "relay7d", "relay30d"] | None',
+        "prompt": 'Required[str]',
+        "resolution": 'Literal["768P", "2K"]',
+        "duration": 'int',
+        "ratio": 'Literal["16:9", "21:9", "4:3", "1:1", "3:4", "9:16", "adaptive"]',
+        "first_frame_url": 'str | None',
+        "last_frame_url": 'str | None',
+        "reference_image_urls": 'list[str] | None',
+        "reference_audio_urls": 'list[str] | None',
+        "mode": 'Literal["auto", "direct"] | None',
+        "async": 'bool | None',
+        "webhook_url": 'str | None',
+    },
+    total=False,
+)
+
+
+class MiniMaxH3Response(TypedDict, total=False):
+    """Response schema for MiniMax H3. `duration` is the billed length: the"""
+
+    urls: Required[list[str]]
+    model: Required[str]
+    duration: int | None
+    task_id: str | None
+    task_address: str | None
+    mode: str | None
+
+
 # MiniMax speech-2.8-hd text-to-speech request (audio source, direct mode only).
 MinimaxSpeech28HdRequest = TypedDict(
     "MinimaxSpeech28HdRequest",
@@ -1475,6 +1734,7 @@ class ModelDetail(TypedDict, total=False):
     pricing: Required[list[PricingItem]]
     available: Required[bool]
     status: Required[Literal["available", "retired"]]
+    conductor: ConductorDetail | None
 
 
 class ModelEndpoint(TypedDict, total=False):
@@ -1497,6 +1757,7 @@ class ModelRow(TypedDict, total=False):
     store_output_supported: Required[bool]
     display_name: str | None
     endpoint: Required[ModelEndpoint | None]
+    conductable: Required[list[Literal["code", "general", "design"]]]
 
 
 class ModelsResponse(TypedDict, total=False):
@@ -1506,6 +1767,58 @@ class ModelsResponse(TypedDict, total=False):
     direct: dict[str, list[ModelRow]] | None
     opengpu: dict[str, list[ModelRow]] | None
     model_restrictions_per_tier: Required[dict[str, list[str]]]
+
+
+class MusicChunk(TypedDict, total=False):
+    """One section of a relay/music-1 composition plan."""
+
+    text: Required[str]
+    duration_ms: Required[int]
+    positive_styles: Required[list[str]]
+    negative_styles: list[str] | None
+    context_adherence: Literal["low", "medium", "high"]
+
+
+class MusicCompositionPlan(TypedDict, total=False):
+    """A section-by-section plan for relay/music-1."""
+
+    chunks: Required[list[MusicChunk]]
+
+
+# relay/music-1 music generation request (audio source, direct mode only).
+MusicGenerateRequest = TypedDict(
+    "MusicGenerateRequest",
+    {
+        "store_output": 'Literal["provider", "relay1d", "relay7d", "relay30d"] | None',
+        "prompt": 'str | None',
+        "composition_plan": 'MusicCompositionPlan | None',
+        "music_length_ms": 'int | None',
+        "force_instrumental": 'bool | None',
+        "seed": 'int | None',
+        "output_format": 'Literal["mp3_48000_128", "mp3_48000_192", "mp3_48000_240", "mp3_48000_320", "mp3_22050_32", "mp3_24000_48", "mp3_44100_32", "mp3_44100_64", "mp3_44100_96", "mp3_44100_128", "mp3_44100_192", "pcm_8000", "pcm_16000", "pcm_22050", "pcm_24000", "pcm_32000", "pcm_44100", "pcm_48000", "ulaw_8000", "alaw_8000", "opus_48000_32", "opus_48000_64", "opus_48000_96", "opus_48000_128", "opus_48000_192"]',
+        "with_timestamps": 'bool | None',
+        "with_waveform_visual": 'bool | None',
+        "mode": 'Literal["auto", "direct"] | None',
+        "async": 'bool | None',
+        "webhook_url": 'str | None',
+    },
+    total=False,
+)
+
+
+class MusicGenerateResponse(TypedDict, total=False):
+    """Response schema for relay/music-1: inline base64 audio plus the song's facts."""
+
+    audio_base64: Required[str]
+    content_type: str | None
+    task_id: str | None
+    mode: str | None
+    duration: float | None
+    billable_seconds: float | None
+    composition_plan: dict[str, Any] | None
+    song_metadata: dict[str, Any] | None
+    words_timestamps: list[dict[str, Any]] | None
+    waveform_visual: list[Any] | None
 
 
 class NetworkSpec(TypedDict, total=False):
@@ -1530,6 +1843,8 @@ class OpenAIChatCompletionChunk(TypedDict, total=False):
     object: str
     choices: list[dict[str, Any]]
     usage: dict[str, Any] | None
+    routing: RoutingReceipt
+    translation: TranslationInfo
 
 
 # OpenAI Chat Completions API request
@@ -1568,6 +1883,7 @@ OpenAIChatRequest = TypedDict(
         "mode": 'Literal["auto", "opengpu", "direct"] | None',
         "async": 'bool | None',
         "webhook_url": 'str | None',
+        "routing": 'RoutingRequest | None',
     },
     total=False,
 )
@@ -1586,6 +1902,8 @@ class OpenAIChatResponse(TypedDict, total=False):
     task_id: str | None
     task_address: str | None
     mode: str | None
+    routing: RoutingReceipt | None
+    translation: TranslationInfo | None
 
 
 class PercentileSet(TypedDict, total=False):
@@ -1799,6 +2117,90 @@ class RelayErrorResponse(TypedDict, total=False):
     error: Required[RelayError]
 
 
+# relay/tts-1 and relay/tts-1-turbo text-to-speech request (audio source,
+RelayTtsRequest = TypedDict(
+    "RelayTtsRequest",
+    {
+        "store_output": 'Literal["provider", "relay1d", "relay7d", "relay30d"] | None',
+        "text": 'Required[str]',
+        "voice": 'Literal["atlas", "nova", "orion", "lyra", "sage", "kai", "wren", "river", "mira", "cole", "deniz", "ege", "felix", "celine", "sol", "leon", "noor", "hana"]',
+        "output_format": 'Literal["alaw_8000", "m4a_aac_44100_128", "mp3_22050_32", "mp3_24000_48", "mp3_44100_128", "mp3_44100_192", "mp3_44100_32", "mp3_44100_64", "mp3_44100_96", "opus_48000_128", "opus_48000_192", "opus_48000_32", "opus_48000_64", "opus_48000_96", "pcm_16000", "pcm_22050", "pcm_24000", "pcm_32000", "pcm_44100", "pcm_48000", "pcm_8000", "ulaw_8000", "wav_16000", "wav_22050", "wav_24000", "wav_32000", "wav_44100", "wav_48000", "wav_8000"] | None',
+        "language_code": 'str | None',
+        "stability": 'float | None',
+        "similarity_boost": 'float | None',
+        "seed": 'int | None',
+        "previous_text": 'str | None',
+        "next_text": 'str | None',
+        "apply_text_normalization": 'Literal["auto", "on", "off"] | None',
+        "audio_effects_filter_preset_id": 'Literal["old_radio", "robot", "cheap_microphone", "phone", "low_quality_phone", "bright_phone"] | None',
+        "audio_effects_distance": 'float | None',
+        "audio_effects_environment_id": 'Literal["small_room", "big_room", "hall", "tunnel", "street", "valley", "forest"] | None',
+        "audio_effects_background_noise_id": 'Literal["call_center", "cafe", "city", "keyboard"] | None',
+        "audio_effects_send_level": 'float | None',
+        "audio_effects_pan": 'float | None',
+        "with_timestamps": 'bool | None',
+        "mode": 'Literal["auto", "direct"] | None',
+        "async": 'bool | None',
+        "webhook_url": 'str | None',
+    },
+    total=False,
+)
+
+
+class RelayTtsResponse(TypedDict, total=False):
+    """Response schema for relay/tts-1 and relay/tts-1-turbo: inline base64 audio."""
+
+    audio_base64: Required[str]
+    content_type: str | None
+    task_id: str | None
+    mode: str | None
+    characters: int | None
+    alignment: dict[str, Any] | None
+    normalized_alignment: dict[str, Any] | None
+
+
+class RoutingPair(TypedDict, total=False):
+    """The model and reasoning effort RelayConductor served."""
+
+    model: str | None
+    effort: str | None
+
+
+class RoutingReceipt(TypedDict, total=False):
+    """Why RelayConductor served this model: the decision behind a `relay/conductor` request."""
+
+    engine: str | None
+    engine_model: str | None
+    usecase: str | None
+    level: int | None
+    level_probs: list[float] | None
+    precision: float | None
+    objective: Literal["cost", "balanced", "performance", "benchmaxxing"] | None
+    list: str | list[str] | None
+    table: Literal["stream", "sync"] | None
+    rung: int | None
+    rung_requested: int | None
+    pair: RoutingPair | None
+    floor: float | None
+    reason: str | None
+    expert: str | None
+    fallback: str | None
+    effort_pinned: str | None
+    engine_ms: float | None
+    sticky_hit: bool | None
+    translated: bool | None
+
+
+class RoutingRequest(TypedDict, total=False):
+    """The `routing` object on a `relay/conductor` request. Every field is optional."""
+
+    engine: str
+    models: str | list[str]
+    usecase: Literal["auto", "code", "general", "design"]
+    objective: Literal["cost", "balanced", "performance", "benchmaxxing"]
+    sticky: bool
+
+
 # Request schema for Seedream image generation and reference-image editing.
 SeedreamRequest = TypedDict(
     "SeedreamRequest",
@@ -1826,6 +2228,30 @@ class SeedreamResponse(TypedDict, total=False):
     size: Required[str]
     task_id: str | None
     mode: str | None
+
+
+class SlotMint(TypedDict, total=False):
+    """The (optional) body of `POST /v2/files/slots`."""
+
+    retention: Literal["relay1h", "relay1d", "relay7d", "relay30d"]
+    filename: str | None
+
+
+class SlotResponse(TypedDict, total=False):
+    """A minted upload slot. Whoever holds `put_url` can upload ONE file to"""
+
+    slot_id: Required[str]
+    put_url: Required[str]
+    expires_at: Required[str]
+    retention: Required[Literal["relay1h", "relay1d", "relay7d", "relay30d"]]
+    curl: Required[str]
+
+
+class SlotView(TypedDict, total=False):
+    """A live slot, as `GET /v2/files/slots/{token}` shows it to a non-browser."""
+
+    retention: Required[Literal["relay1h", "relay1d", "relay7d", "relay30d"]]
+    expires_at: Required[str]
 
 
 # Request schema for Sora image-to-video generation.
@@ -1952,6 +2378,18 @@ class StreamErrorResponse(TypedDict, total=False):
     error: Required[StreamErrorResponseError]
 
 
+class Stt1AdditionalFormat(TypedDict, total=False):
+    """One extra export of a relay/stt-1 transcript (`additional_formats`)."""
+
+    format: Required[Literal["segmented_json", "docx", "pdf", "txt", "html", "srt"]]
+    include_speakers: bool | None
+    include_timestamps: bool | None
+    segment_on_silence_longer_than_s: float | None
+    max_segment_duration_s: float | None
+    max_segment_chars: int | None
+    max_characters_per_line: int | None
+
+
 class TaskStatusResponse(TypedDict, total=False):
     """Response from GET /v2/tasks/{task_id} polling endpoint."""
 
@@ -1991,12 +2429,35 @@ class TiersResponse(TypedDict, total=False):
     current_tier: Required[str]
 
 
+class TranslationInfo(TypedDict, total=False):
+    """What the format translation changed, when RelayConductor served a model of another API format."""
+
+    notes: Required[list[TranslationNote]]
+
+
+class TranslationNote(TypedDict, total=False):
+    """One step the format translation could not carry over exactly."""
+
+    field: Required[str]
+    action: Required[str]
+    reason: Required[str]
+
+
+class UnavailableStep(TypedDict, total=False):
+    """UnavailableStep"""
+
+    step: Required[str]
+    model: Required[str]
+    reason: Required[Literal["retired", "unknown"]]
+
+
 class UpdateKeyRequest(TypedDict, total=False):
     """UpdateKeyRequest"""
 
     name: str | None
     restrictions: KeyRestrictions | None
     key_budget: float | None
+    instances_allowed: bool
 
 
 class UpdateModelAllowlistRequest(TypedDict, total=False):
@@ -2488,6 +2949,8 @@ class WorkflowTemplateItem(TypedDict, total=False):
     input_schema: dict[str, Any] | None
     steps: Required[list[WorkflowStepSummary]]
     restricted_tiers: list[str]
+    available: bool
+    unavailable_steps: list[UnavailableStep]
 
 __all__ = [
     "ASRRequest",
@@ -2503,6 +2966,12 @@ __all__ = [
     "BriaVideoUpscaleResponse",
     "CatalogResponse",
     "CatalogRow",
+    "ConductorDetail",
+    "ConductorExcluded",
+    "ConductorList",
+    "ConductorRung",
+    "ConductorTable",
+    "ConductorUseCase",
     "ContainerConnection",
     "CpuSpec",
     "CreateKeyRequest",
@@ -2515,12 +2984,16 @@ __all__ = [
     "CustomerPricingResponse",
     "CustomerSettingsResponse",
     "CustomerSettingsUpdate",
+    "CustomerTaskItem",
+    "CustomerTaskPage",
     "CustomerUsageResponse",
     "DedicatedConnection",
     "DoubaoSeedance15ProRequest",
     "DoubaoSeedance15ProResponse",
     "DoubaoSeedance20Request",
     "DoubaoSeedance20Response",
+    "DoubaoSeedance20Up720pRequest",
+    "DoubaoSeedance20Up720pV2VRequest",
     "DoubaoSeedance25Request",
     "DoubaoSeedance25V2VRequest",
     "DoubaoSeedanceV2VRequest",
@@ -2576,6 +3049,9 @@ __all__ = [
     "KlingV3I2VResponse",
     "KlingV3MotionControlRequest",
     "KlingV3MotionControlResponse",
+    "KlingV3OmniRequest",
+    "KlingV3OmniResponse",
+    "KlingV3Shot",
     "KlingV3T2VRequest",
     "KlingV3T2VResponse",
     "LastSpawn",
@@ -2588,6 +3064,8 @@ __all__ = [
     "MetricsPage",
     "MetricsResult",
     "MetricsSummary",
+    "MiniMaxH3Request",
+    "MiniMaxH3Response",
     "MinimaxSpeech28HdRequest",
     "MinimaxSpeech28HdResponse",
     "ModelAllowlistResponse",
@@ -2596,6 +3074,10 @@ __all__ = [
     "ModelEndpoint",
     "ModelRow",
     "ModelsResponse",
+    "MusicChunk",
+    "MusicCompositionPlan",
+    "MusicGenerateRequest",
+    "MusicGenerateResponse",
     "NetworkSpec",
     "NpuSpec",
     "OpenAIChatCompletionChunk",
@@ -2617,8 +3099,16 @@ __all__ = [
     "RealESRGANUpscaleResponse",
     "RelayError",
     "RelayErrorResponse",
+    "RelayTtsRequest",
+    "RelayTtsResponse",
+    "RoutingPair",
+    "RoutingReceipt",
+    "RoutingRequest",
     "SeedreamRequest",
     "SeedreamResponse",
+    "SlotMint",
+    "SlotResponse",
+    "SlotView",
     "SoraI2VRequest",
     "SoraI2VResponse",
     "SoraProI2VRequest",
@@ -2629,10 +3119,14 @@ __all__ = [
     "SoraT2VResponse",
     "StreamErrorResponse",
     "StreamErrorResponseError",
+    "Stt1AdditionalFormat",
     "TaskStatusResponse",
     "TerminateResponse",
     "TierInfo",
     "TiersResponse",
+    "TranslationInfo",
+    "TranslationNote",
+    "UnavailableStep",
     "UpdateKeyRequest",
     "UpdateModelAllowlistRequest",
     "UpdateProfileRequest",
