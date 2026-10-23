@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "relaygpu-client"
-version = "0.1.1"
+version = "0.1.2"
 description = "Python client for the Relay API: image, video and audio generation, tasks, files, webhooks, workflows and typed errors."
 readme = "README.md"
 license = "MIT"

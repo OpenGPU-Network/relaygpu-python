@@ -1,5 +1,5 @@
-"""Port of test/unit/models.test.ts: models.get (path, keyless, 5-min cache, uncached failure), models.list, and the
-keyless pricing / tiers / health reads."""
+"""Port of test/unit/models.test.ts: models.get (path, credential, 5-min cache, uncached failure), models.list, and the
+pricing / tiers / health reads (keyless without a credential)."""
 
 from __future__ import annotations
 
@@ -7,12 +7,12 @@ from typing import Any
 
 import pytest
 
-from relaygpu import ModelNotFoundError
-from tests.helpers import DETAILS, MODELS, PRICING, Mock, VirtualClock, detail, json_reply, maybe
+from relaygpu import AuthenticationError, InsufficientCreditsError, ModelNotFoundError
+from tests.helpers import DETAILS, KEY, MODELS, PRICING, Mock, VirtualClock, detail, json_reply, maybe, relay_error
 
 
 class TestModelsGet:
-    async def test_puts_the_slash_raw_in_the_path_sends_no_key_caches_for_one_fetch_per_name(self, make: Any) -> None:
+    async def test_puts_the_slash_raw_in_the_path_sends_the_clients_key_caches_for_one_fetch_per_name(self, make: Any) -> None:
         m = Mock(detail("KlingTeam/v3-T2V"))
         relay = make(m)
         a = await maybe(relay.models.get("KlingTeam/v3-T2V"))
@@ -20,7 +20,7 @@ class TestModelsGet:
         assert a is b
         assert len(m.calls) == 1
         assert m.calls[0].url == "http://relay.test/v2/models/KlingTeam/v3-T2V"
-        assert "x-api-key" not in m.calls[0].headers
+        assert m.calls[0].headers["x-api-key"] == KEY
         assert {k: a["endpoint"][k] for k in ("path", "model_in_body", "async_default")} == {
             "path": "/v2/video/kling-3/t2v",
             "model_in_body": False,
@@ -75,13 +75,85 @@ class TestModelsList:
 
 
 class TestPricingTiersHealth:
-    async def test_are_keyless_gets(self, make: Any) -> None:
+    async def test_are_gets_of_the_public_catalog_without_a_credential(self, make: Any) -> None:
         m = Mock(
             json_reply(200, PRICING), json_reply(200, {"tiers": []}), json_reply(200, {"status": "ok", "version": "2", "commit": "abc"})
         )
-        relay = make(m)
+        relay = make(m, api_key=None)
         assert (await maybe(relay.pricing.get()))["media_storage"]["relay1d"] == 0.0005
         await maybe(relay.tiers.list())
         assert (await maybe(relay.health()))["status"] == "ok"
         assert [c.url for c in m.calls] == ["http://relay.test/v2/pricing", "http://relay.test/v2/tiers", "http://relay.test/v2/health"]
         assert all("x-api-key" not in c.headers for c in m.calls)
+
+
+def _four_reads() -> Mock:
+    return Mock(
+        json_reply(200, MODELS),
+        detail("KlingTeam/v3-T2V"),
+        json_reply(200, PRICING),
+        json_reply(200, {"tiers": []}),
+    )
+
+
+async def _read_all(relay: Any) -> None:
+    await maybe(relay.models.list())
+    await maybe(relay.models.get("KlingTeam/v3-T2V"))
+    await maybe(relay.pricing.get())
+    await maybe(relay.tiers.list())
+
+
+class TestCatalogReadsAsTheAccount:
+    async def test_a_keyed_client_sends_x_api_key_on_all_four_reads(self, make: Any) -> None:
+        m = _four_reads()
+        await _read_all(make(m))
+        assert [c.url.removeprefix("http://relay.test") for c in m.calls] == [
+            "/v2/models",
+            "/v2/models/KlingTeam/v3-T2V",
+            "/v2/pricing",
+            "/v2/tiers",
+        ]
+        assert all(c.headers["x-api-key"] == KEY and "authorization" not in c.headers for c in m.calls)
+
+    async def test_a_jwt_client_sends_bearer_on_all_four_reads(self, make: Any) -> None:
+        m = _four_reads()
+        await _read_all(make(m, api_key=None, jwt="a.b.c"))
+        assert all(c.headers["authorization"] == "Bearer a.b.c" and "x-api-key" not in c.headers for c in m.calls)
+
+    async def test_a_client_with_no_credential_sends_none(self, make: Any) -> None:
+        m = _four_reads()
+        await _read_all(make(m, api_key=None))
+        assert len(m.calls) == 4
+        assert all("x-api-key" not in c.headers and "authorization" not in c.headers for c in m.calls)
+
+    async def test_the_task_poll_and_health_stay_credential_free_with_a_keyed_client(self, make: Any) -> None:
+        m = Mock(json_reply(200, {"status": "queued"}), json_reply(200, {"status": "ok", "version": "2", "commit": "abc"}))
+        relay = make(m)
+        await maybe(relay.tasks.get("direct:1"))
+        await maybe(relay.health())
+        assert len(m.calls) == 2
+        assert all("x-api-key" not in c.headers and "authorization" not in c.headers for c in m.calls)
+
+    @pytest.mark.parametrize(
+        ("status", "code", "exc"),
+        [(401, "INVALID_API_KEY", AuthenticationError), (402, "INSUFFICIENT_CREDITS", InsufficientCreditsError)],
+    )
+    async def test_a_refused_or_underfunded_key_raises_its_typed_error_on_models_list(
+        self, make: Any, status: int, code: str, exc: type[Exception]
+    ) -> None:
+        with pytest.raises(exc) as ei:
+            await maybe(make(Mock(relay_error(status, code))).models.list())
+        assert ei.value.status == status  # type: ignore[attr-defined]
+
+    async def test_the_models_get_cache_is_per_client_a_keyed_and_a_keyless_client_do_not_share(self, make: Any) -> None:
+        name = "KlingTeam/v3-T2V"
+        m = Mock(detail(name), detail("nope/nope"))
+        keyed = make(m)
+        keyless = make(m, api_key=None)
+        assert (await maybe(keyed.models.get(name)))["name"] == name
+        assert await maybe(keyed.models.get(name)) is not None
+        assert len(m.calls) == 1
+        with pytest.raises(ModelNotFoundError):
+            await maybe(keyless.models.get(name))
+        assert len(m.calls) == 2
+        assert "x-api-key" in m.calls[0].headers and "x-api-key" not in m.calls[1].headers

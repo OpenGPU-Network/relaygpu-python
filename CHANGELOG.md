@@ -3,6 +3,17 @@
 `relaygpu-client` versions track the TypeScript client [`@relaygpu/client`](https://www.npmjs.com/package/@relaygpu/client)
 minor for minor: 0.1.x here is the port of 0.1.x there. The API may change before 1.0.
 
+## 0.1.2 (unreleased)
+
+- **Catalog reads are account-aware.** `models.list`, `models.get`, `pricing.get` and `tiers.list` now send the
+  client's credential (`api_key` or `jwt`), so with one they return your account's view: the models your tier and
+  grants can run, beyond the public list. A client without a credential sends none and reads the public catalog,
+  unchanged. A key Relay refuses raises `AuthenticationError` on these reads, a key below the credit floor
+  `InsufficientCreditsError`. The `models.get` cache stays per client. `health`, task polls and workflow run polls
+  stay credential-free.
+- **Generated types** follow the prod public spec of 2026-10-24: the Anthropic-compatible route is live again with no
+  public model list; the `doubao-seedance-2-0-filter-off` pair left the public model map.
+
 ## 0.1.1 (2026-10-22)
 
 - **Generated types** follow the prod public spec of 2026-10-22: Claude is served through RelayConductor
