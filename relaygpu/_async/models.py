@@ -1,5 +1,5 @@
-"""The catalog, keyless (port of src/models.ts). ``models.get`` is the SDK's one resolver of route, ``model_in_body``,
-``async_default`` and schemas."""
+"""The catalog (port of src/models.ts); read as your account when the client has a credential, public otherwise.
+``models.get`` is the SDK's one resolver of route, ``model_in_body``, ``async_default`` and schemas."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class AsyncModels:
-    """``GET /v2/models`` and ``GET /v2/models/{name}`` (keyless)."""
+    """``GET /v2/models`` and ``GET /v2/models/{name}`` ."""
 
     def __init__(self, relay: AsyncRelay) -> None:
         self._relay = relay
@@ -24,7 +24,7 @@ class AsyncModels:
     async def list(self, *, tag: str | None = None) -> list[ModelRow]:
         """``GET /v2/models`` flattened: every model listed under ``auto``, once, optionally filtered by ``tag``
         (e.g. ``text-to-video``)."""
-        res = await self._relay._http.request("GET", "/v2/models", no_auth=True)
+        res = await self._relay._http.request("GET", "/v2/models")
         data = cast(ModelCatalog, res.data)
         seen: dict[str, ModelRow] = {}
         for rows in (data.get("auto") or {}).values():
@@ -41,7 +41,7 @@ class AsyncModels:
         hit = self._cache.get(name)
         if hit is not None and hit[0] > now:
             return hit[1]
-        res = await self._relay._http.request("GET", model_path(name), no_auth=True)
+        res = await self._relay._http.request("GET", model_path(name))
         detail = cast(ModelDetail, res.data)
         self._cache[name] = (now + common.MODEL_CACHE_SECONDS, detail)
         return detail
@@ -54,7 +54,7 @@ class AsyncPricing:
         self._relay = relay
 
     async def get(self) -> PricingResponse:
-        res = await self._relay._http.request("GET", "/v2/pricing", no_auth=True)
+        res = await self._relay._http.request("GET", "/v2/pricing")
         return cast(PricingResponse, res.data)
 
 
@@ -65,7 +65,7 @@ class AsyncTiers:
         self._relay = relay
 
     async def list(self) -> TiersResponse:
-        res = await self._relay._http.request("GET", "/v2/tiers", no_auth=True)
+        res = await self._relay._http.request("GET", "/v2/tiers")
         return cast(TiersResponse, res.data)
 
 

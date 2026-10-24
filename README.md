@@ -37,7 +37,7 @@ relay = Relay(
 ```
 
 The key is not read from the environment: pass it. It never appears in an error, a log line or `repr(relay)`.
-Catalog reads (`models`, `pricing`, `tiers`, `health`) and task polls need no credential.
+`health` and task polls need no credential; the catalog reads use yours when the client has one (see Models below).
 
 The client holds a connection pool. Use it as a context manager, or call `relay.close()` when you are done:
 
@@ -293,6 +293,8 @@ knows also get `Literal` hints for autocomplete.
 
 - An unknown name raises `ModelNotFoundError` (404); a retired one raises `ModelRetiredError` (403). Both
   before anything is submitted or billed.
+- With a credential the catalog reads (`models`, `pricing`, `tiers`) are your account's view: what your tier and
+  grants can run. Without one they are the public catalog. A refused key raises `AuthenticationError` on them.
 - `relay.models.list(tag="text-to-video")` lists the catalog; `relay.models.get(name)` returns one model with
   its `request_schema`, `request_example` and `pricing`.
 - `run()` returns a sync route's body, or waits for an async route and returns the task's `result`.

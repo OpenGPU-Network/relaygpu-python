@@ -49,7 +49,7 @@ class TestHeadersAndAuth:
     async def test_user_agent_and_accept(self, make: Any) -> None:
         m = Mock(json_reply(200, {}))
         await req(make(m), "GET", "/v2/x")
-        assert m.calls[0].headers["user-agent"] == "relaygpu-python/0.1.1"
+        assert m.calls[0].headers["user-agent"] == "relaygpu-python/0.1.2"
         assert m.calls[0].headers["accept"] == "application/json"
 
     async def test_query_encoding_matches_js(self, make: Any) -> None:

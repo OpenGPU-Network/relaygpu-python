@@ -94,7 +94,7 @@ def test_ts_values_have_python_twins() -> None:
     assert missing == []
     assert relaygpu.AsyncRelay is AsyncRelay
     assert relaygpu.DEFAULT_BASE_URL == "https://relaygpu.com"
-    assert relaygpu.VERSION == "0.1.1"
+    assert relaygpu.VERSION == "0.1.2"
 
 
 def test_repr_is_pinned_and_never_carries_the_credential() -> None:

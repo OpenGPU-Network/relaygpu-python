@@ -1,4 +1,4 @@
-"""A2 (catalog), port of test/e2e/catalog.e2e.test.ts: FREE, keyless reads against staging — models.list, models.get for
+"""A2 (catalog), port of test/e2e/catalog.e2e.test.ts: FREE reads against staging — models.list, models.get for
 one model per family, run-path resolution WITHOUT a submit, retired → ModelRetiredError before any POST, unknown →
 ModelNotFoundError. Skips without RELAY_BASE_URL / RELAY_API_KEY; refuses a production base URL. Costs nothing: every
 test here is free (no POST is ever sent; each test asserts it)."""
@@ -15,7 +15,7 @@ from relaygpu._run_common import resolve_endpoint
 from tests.e2e.conftest import BASE_URL
 
 FAMILIES: list[tuple[str, str, bool, bool]] = [
-    ("Qwen/qwen-image", "/v2/image/qwen/generate", True, False),
+    ("google/gemini-nano-banana-2.1", "/v2/image/gemini-3/generate", True, False),
     ("openai/gpt-image-1.5-T2I", "/v2/image/gpt-image/generate", False, False),
     ("KlingTeam/v3-T2V", "/v2/video/kling-3/t2v", False, True),
     ("KlingTeam/v3-Motion-Control", "/v2/video/kling-3/motion-control", False, True),
@@ -47,7 +47,7 @@ def test_models_get_resolves_one_model_per_family_to_its_route_no_submit_one_fet
         assert d["request_schema"], name
         c.relay.models.get(name)
     assert len(c.calls) == len(FAMILIES)
-    assert c.calls[0].url == f"{(BASE_URL or '').rstrip('/')}/v2/models/Qwen/qwen-image"
+    assert c.calls[0].url == f"{(BASE_URL or '').rstrip('/')}/v2/models/google/gemini-nano-banana-2.1"
     assert c.posts() == []
 
 
@@ -85,3 +85,34 @@ def test_an_unknown_model_throws_model_not_found_error_with_request_id_before_an
 def test_model_names_are_case_sensitive_kling_v3_motion_control_is_not_a_model(counted: Callable[..., Any]) -> None:
     with pytest.raises(ModelNotFoundError):
         counted().relay.models.get("KlingTeam/v3-motion-control")
+
+
+PRIVATE_CLAUDE = "anthropic/claude-haiku-5-5"
+PRIVATE_FILTER_OFF = "ByteDance/doubao-seedance-2-0-filter-off"
+
+
+def test_account_aware_list_a_keyed_client_sees_its_granted_private_models_a_keyless_one_does_not(counted: Callable[..., Any]) -> None:
+    keyed = {r["name"] for r in counted().relay.models.list()}
+    keyless = {r["name"] for r in counted(api_key=None).relay.models.list()}
+    assert PRIVATE_CLAUDE in keyed and PRIVATE_FILTER_OFF in keyed
+    assert PRIVATE_CLAUDE not in keyless and PRIVATE_FILTER_OFF not in keyless
+
+
+def test_account_aware_get_resolves_a_granted_private_model_keyless_raises_not_found(counted: Callable[..., Any]) -> None:
+    d = counted().relay.models.get(PRIVATE_CLAUDE)
+    assert d["status"] == "available"
+    assert d["endpoint"]["path"] == "/v2/anthropic/v1/messages"
+    with pytest.raises(ModelNotFoundError):
+        counted(api_key=None).relay.models.get(PRIVATE_CLAUDE)
+
+
+def test_account_aware_pricing_and_estimate_cost(counted: Callable[..., Any]) -> None:
+    def has_row(pricing: Any) -> bool:
+        return any(r.get("model", "").endswith(PRIVATE_CLAUDE) and r.get("mode") == "direct" for r in pricing["pricing"])
+
+    keyed = counted()
+    assert has_row(keyed.relay.pricing.get())
+    assert not has_row(counted(api_key=None).relay.pricing.get())
+    est = keyed.relay.estimate_cost(PRIVATE_CLAUDE, {"input_tokens": 1000, "output_tokens": 100})
+    assert isinstance(est["usd"], (int, float)) and est["usd"] > 0
+    assert keyed.posts() == []
