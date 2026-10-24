@@ -4,7 +4,7 @@
 
 The Python client for [Relay](https://relaygpu.com): image, video and audio generation, async tasks, file
 uploads, webhook verification, workflows, account and keys, with typed errors. Request and response types are
-generated from Relay's public OpenAPI spec. Chat is not wrapped: point the OpenAI or Anthropic SDK at Relay
+generated from Relay's public OpenAPI spec. Chat is not wrapped: point the OpenAI SDK at Relay
 ([quickstart 6](#6-chat-use-the-sdk-you-already-have)). A port of the TypeScript client
 [`@relaygpu/client`](https://www.npmjs.com/package/@relaygpu/client), version for version (0.1.x ↔ 0.1.x).
 
@@ -252,9 +252,9 @@ with Relay(os.environ["RELAY_API_KEY"], base_url=os.environ.get("RELAY_BASE_URL"
         sys.exit(f"run {e.task_id} did not complete: {e}")
 ```
 
-### 6. Chat: use the SDK you already have
+### 6. Text: use the SDK you already have
 
-Chat and completions run on the official OpenAI and Anthropic SDKs: point them at Relay. This SDK does not wrap
+Chat and completions run on the official OpenAI SDK: point it at Relay. This SDK does not wrap
 chat. `openai` is an example dependency only (`pip install openai`); `relaygpu-client` does not need it.
 ([`examples/06_chat_base_url.py`](examples/06_chat_base_url.py))
 
@@ -523,14 +523,13 @@ CPython 3.10, 3.11, 3.12 and 3.13, tested in CI on each. One runtime dependency,
 (`AsyncRelay` runs on `asyncio`). `relay.request(method, path, json=...)` reaches any route
 with the same errors and retry policy.
 
-## Chat
+## Text
 
-Chat is a base-URL swap on the official SDKs, in any language:
+Chat is a base-URL swap on the official SDK, in any language:
 
 | SDK | Base URL |
 |---|---|
 | OpenAI | `https://relaygpu.com/v2/openai/v1` |
-| Anthropic | `https://relaygpu.com/v2/anthropic` |
 
 ## License
 
