@@ -3,7 +3,7 @@ RELAY_API_KEY / RELAY_BASE_URL; refuses a production base URL. Approximate cost 
 
 - A8 Kling v3-T2V 3 s std silent: 1 task (0.252; the replay and the 422 create none) — not waited on
 - A1 video + wait: Kling v3-T2V 3 s std silent: 0.252 (≤ 5 long-poll requests)
-- A1 image Qwen/qwen-image 512x512: 0.036 · TTS qwen3-tts-flash ~25 chars: ~0.0003
+- A1 image google/gemini-nano-banana-2.1 1K: ~0.04 · TTS qwen3-tts-flash ~25 chars: ~0.0003
 - A1 ASR whisper-1 on that TTS clip's BYTES (~2 s, implicit relay1h upload = free): ~0.0002
 
 Total ≈ $0.54. The A3 motion-control part lives in tests/e2e/test_files.py and reuses VIDEO_URL / IMAGE_URL below:
@@ -74,7 +74,7 @@ def test_a1_a8_a_generated_key_rides_the_async_video_submit_wait_long_polls_in_a
 
 def test_a1_image_sync_and_tts_carry_no_idempotency_key_asr_takes_bytes_through_the_implicit_upload(counted: Callable[..., Any]) -> None:
     c = counted()
-    img = c.relay.image.generate("Qwen/qwen-image", {"prompt": "A small red apple on a white table", "size": "512x512"})
+    img = c.relay.image.generate("google/gemini-nano-banana-2.1", {"prompt": "A small red apple on a white table"})
     assert len(img.images) > 0
     assert img.images[0].url and img.images[0].url.startswith("https://")
     assert len(img.images[0].to_bytes()) > 0

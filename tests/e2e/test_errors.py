@@ -38,7 +38,7 @@ def test_a5_budget_zero_key_on_its_allowed_model_key_budget_exhausted_error_with
 
 
 def test_a5_allowlisted_key_on_any_other_model_the_403_class_with_its_code() -> None:
-    other = "Qwen/qwen-image" if ALLOWED_MODEL == "Qwen/qwen3-tts-flash" else "Qwen/qwen3-tts-flash"
+    other = "google/gemini-nano-banana-2.1" if ALLOWED_MODEL == "Qwen/qwen3-tts-flash" else "Qwen/qwen3-tts-flash"
     relay = Relay(api_key=ALLOWLISTED, base_url=BASE_URL)
     with pytest.raises(PermissionDeniedError) as ei:
         relay.run(other, example_for(other), wait=False)
