@@ -20,7 +20,7 @@ FAMILIES: list[tuple[str, str, bool, bool]] = [
     ("KlingTeam/v3-T2V", "/v2/video/kling-3/t2v", False, True),
     ("KlingTeam/v3-Motion-Control", "/v2/video/kling-3/motion-control", False, True),
     ("Qwen/qwen3-tts-flash", "/v2/audio/qwen3-tts-flash/generate", False, False),
-    ("openai/whisper-1", "/v2/audio/asr/whisper", True, False),
+    ("relay/stt-1", "/v2/audio/asr/whisper", True, False),
     ("openai/gpt-5.4", "/v2/openai/v1/chat/completions", True, False),
 ]
 

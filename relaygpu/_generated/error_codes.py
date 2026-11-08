@@ -274,6 +274,62 @@ class ServiceUnavailableError(CapacityError):
     """`SERVICE_UNAVAILABLE` (HTTP 503)."""
 
 
+class SmithLevelUnavailableError(ValidationError):
+    """`SMITH_LEVEL_UNAVAILABLE` (HTTP 422)."""
+
+
+class SmithMessageStartedError(ConflictError):
+    """`SMITH_MESSAGE_STARTED` (HTTP 409)."""
+
+
+class SmithNotEntitledError(PermissionDeniedError):
+    """`SMITH_NOT_ENTITLED` (HTTP 403)."""
+
+
+class SmithNotFoundError(NotFoundError):
+    """`SMITH_NOT_FOUND` (HTTP 404)."""
+
+
+class SmithQueueFullError(ConflictError):
+    """`SMITH_QUEUE_FULL` (HTTP 409)."""
+
+
+class SmithSessionBusyError(ConflictError):
+    """`SMITH_SESSION_BUSY` (HTTP 409)."""
+
+
+class SmithStepNotPausedError(ConflictError):
+    """`SMITH_STEP_NOT_PAUSED` (HTTP 409)."""
+
+
+class SmithTurnLimitError(ValidationError):
+    """`SMITH_TURN_LIMIT` (HTTP 422)."""
+
+
+class SmithUnavailableError(CapacityError):
+    """`SMITH_UNAVAILABLE` (HTTP 503)."""
+
+
+class SubscriptionChargeFailedError(InsufficientCreditsError):
+    """`SUBSCRIPTION_CHARGE_FAILED` (HTTP 402)."""
+
+
+class SubscriptionExistsError(ConflictError):
+    """`SUBSCRIPTION_EXISTS` (HTTP 409)."""
+
+
+class SubscriptionNotEligibleError(PermissionDeniedError):
+    """`SUBSCRIPTION_NOT_ELIGIBLE` (HTTP 403)."""
+
+
+class SubscriptionTrialUsedError(ConflictError):
+    """`SUBSCRIPTION_TRIAL_USED` (HTTP 409)."""
+
+
+class SubscriptionUnavailableError(CapacityError):
+    """`SUBSCRIPTION_UNAVAILABLE` (HTTP 503)."""
+
+
 class SuperkeyConflictError(ConflictError):
     """`SUPERKEY_CONFLICT` (HTTP 409)."""
 
@@ -388,6 +444,20 @@ ERROR_CODE_CLASSES: dict[str, type[RelayAPIError]] = {
     "ROUTING_ON_FIXED_MODEL": RoutingOnFixedModelError,
     "SCOPE_DENIED": ScopeDeniedError,
     "SERVICE_UNAVAILABLE": ServiceUnavailableError,
+    "SMITH_LEVEL_UNAVAILABLE": SmithLevelUnavailableError,
+    "SMITH_MESSAGE_STARTED": SmithMessageStartedError,
+    "SMITH_NOT_ENTITLED": SmithNotEntitledError,
+    "SMITH_NOT_FOUND": SmithNotFoundError,
+    "SMITH_QUEUE_FULL": SmithQueueFullError,
+    "SMITH_SESSION_BUSY": SmithSessionBusyError,
+    "SMITH_STEP_NOT_PAUSED": SmithStepNotPausedError,
+    "SMITH_TURN_LIMIT": SmithTurnLimitError,
+    "SMITH_UNAVAILABLE": SmithUnavailableError,
+    "SUBSCRIPTION_CHARGE_FAILED": SubscriptionChargeFailedError,
+    "SUBSCRIPTION_EXISTS": SubscriptionExistsError,
+    "SUBSCRIPTION_NOT_ELIGIBLE": SubscriptionNotEligibleError,
+    "SUBSCRIPTION_TRIAL_USED": SubscriptionTrialUsedError,
+    "SUBSCRIPTION_UNAVAILABLE": SubscriptionUnavailableError,
     "SUPERKEY_CONFLICT": SuperkeyConflictError,
     "SYSTEM_KEY_IMMUTABLE": SystemKeyImmutableError,
     "TASK_NOT_FOUND": TaskNotFoundError,
@@ -469,6 +539,20 @@ __all__ = [
     "RoutingOnFixedModelError",
     "ScopeDeniedError",
     "ServiceUnavailableError",
+    "SmithLevelUnavailableError",
+    "SmithMessageStartedError",
+    "SmithNotEntitledError",
+    "SmithNotFoundError",
+    "SmithQueueFullError",
+    "SmithSessionBusyError",
+    "SmithStepNotPausedError",
+    "SmithTurnLimitError",
+    "SmithUnavailableError",
+    "SubscriptionChargeFailedError",
+    "SubscriptionExistsError",
+    "SubscriptionNotEligibleError",
+    "SubscriptionTrialUsedError",
+    "SubscriptionUnavailableError",
     "SuperkeyConflictError",
     "SystemKeyImmutableError",
     "TaskNotFoundError",

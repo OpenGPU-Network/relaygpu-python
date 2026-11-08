@@ -3,7 +3,16 @@
 `relaygpu-client` versions track the TypeScript client [`@relaygpu/client`](https://www.npmjs.com/package/@relaygpu/client)
 minor for minor: 0.1.x here is the port of 0.1.x there. The API may change before 1.0.
 
-## 0.1.2 (unreleased)
+## 0.1.3 (unreleased)
+
+- **Generated types** follow the prod public spec of 2026-11-08 (Relay Roll 47): the OpenAI Responses route
+  (`POST /v2/openai/v1/responses`; a base-URL swap on the OpenAI SDK, stateless), the ClarityAI upscalers
+  (`/v2/image/clarity/upscale`), MiniMax H3 V2V, `moonshotai/kimi-k3.1-pro`, `GET /v2/customer/keys/{key}`,
+  `result_field` on the model detail, `cancel_requested` on workflow runs, numeric pricing cells, the Smith and
+  subscription routes with their fourteen error codes as typed errors. `openai/whisper-1` left the public model map
+  (retired 2026-11-02; use `relay/stt-1`).
+
+## 0.1.2 (2026-10-24)
 
 - **Catalog reads are account-aware.** `models.list`, `models.get`, `pricing.get` and `tiers.list` now send the
   client's credential (`api_key` or `jwt`), so with one they return your account's view: the models your tier and
