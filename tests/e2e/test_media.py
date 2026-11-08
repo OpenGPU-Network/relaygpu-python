@@ -4,7 +4,7 @@ RELAY_API_KEY / RELAY_BASE_URL; refuses a production base URL. Approximate cost 
 - A8 Kling v3-T2V 3 s std silent: 1 task (0.252; the replay and the 422 create none) — not waited on
 - A1 video + wait: Kling v3-T2V 3 s std silent: 0.252 (≤ 5 long-poll requests)
 - A1 image google/gemini-nano-banana-2.1 1K: ~0.04 · TTS qwen3-tts-flash ~25 chars: ~0.0003
-- A1 ASR whisper-1 on that TTS clip's BYTES (~2 s, implicit relay1h upload = free): ~0.0002
+- A1 ASR stt-1 on that TTS clip's BYTES (~2 s, implicit relay1h upload = free): ~0.0002
 
 Total ≈ $0.54. The A3 motion-control part lives in tests/e2e/test_files.py and reuses VIDEO_URL / IMAGE_URL below:
 run `pytest -m e2e tests/e2e/test_media.py tests/e2e/test_files.py` in that order.
@@ -87,7 +87,7 @@ def test_a1_image_sync_and_tts_carry_no_idempotency_key_asr_takes_bytes_through_
     clip = httpx.get(tts["audio_url"], follow_redirects=True, timeout=60).content  # a plain GET: no Relay credential
     assert len(clip) > 0
 
-    asr = c.relay.audio.transcribe("openai/whisper-1", {"audio_url": clip})
+    asr = c.relay.audio.transcribe("relay/stt-1", {"audio_url": clip})
     assert isinstance(asr["text"], str)
 
     inference = [x for x in c.posts() if "/v2/files" not in x.url]
