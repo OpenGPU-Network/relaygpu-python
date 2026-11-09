@@ -3,7 +3,7 @@
 `relaygpu-client` versions track the TypeScript client [`@relaygpu/client`](https://www.npmjs.com/package/@relaygpu/client)
 minor for minor: 0.1.x here is the port of 0.1.x there. The API may change before 1.0.
 
-## 0.1.3 (unreleased)
+## 0.1.3 (2026-11-09)
 
 - **Generated types** follow the prod public spec of 2026-11-08 (Relay Roll 47): the OpenAI Responses route
   (`POST /v2/openai/v1/responses`; a base-URL swap on the OpenAI SDK, stateless), the ClarityAI upscalers
