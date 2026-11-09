@@ -216,7 +216,7 @@ def gen_models(spec: dict[str, Any]) -> tuple[str, int]:
                 continue
             tag = (op.get("tags") or ["Other"])[0]
             for name in op["x-relay-models"]:
-                by_tag.setdefault(tag, {})[name] = op["operationId"]
+                by_tag.setdefault(tag, {}).setdefault(name, op["operationId"])  # first route in spec order wins
     lines = [BANNER, '"""Known model names (types only: the runtime always resolves through `GET /v2/models/{model}`)."""', ""]
     lines += ["from __future__ import annotations", "", "from typing import Literal", ""]
     lines.append("# Live model names per tag → the operation that serves them (from `x-relay-models`).")
